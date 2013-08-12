@@ -1,0 +1,5 @@
+RewriteEngine on
+RewriteRule   ^m/(.*)/  index.html [L]
+RewriteRule   ^m/(.*)   index.html
+
+ErrorDocument 404 /404.html
