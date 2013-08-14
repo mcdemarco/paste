@@ -3,39 +3,54 @@
 //Requires mod_rewrite for http://paste-app.net/m/<message#>
 
 var api = {
-  accessToken: '<ACCESS_TOKEN>'
+    client_id: '<APP_ID>'
 };
 
 var pasteSite = "http://paste-app.net/";
+var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=messages,public_messages";
 var pasteChannel = null;
-var multipleCount = 10;
+var multipleCount = 8;
+var getvars = [];
 
 //No console.log in IE.
 //if (typeof console == "undefined" || typeof console.log == "undefined") 
 //    var console = { log: function() {} }; 
 
 function initialize() {
-    var getvars = getUrlVars();
+    getvars = getUrlVars();
     if (getvars['m']) {
-	getSingle(getvars['m']);
+	getSingle();
     }
-    var args = {
-	count: 1,
-	channel_types: 'net.paste-app.clips'
-    };
-    api.call('https://alpha-api.app.net/stream/0/channels', 'GET', args,
-             completeChannel, failChannel);
+    if (api.accessToken)
+	getChannel();
+    $("a.adn-button").attr('href',authUrl);
 }
 
-function getSingle(messageId) {
-    var args = {
-	include_annotations: 1,
-	ids: messageId
-    };
-    api.call('https://alpha-api.app.net/stream/0/channels/messages', 'GET', args,
-	     completeSingle, failSingle);
-    if ( history.pushState ) 
-	history.pushState( {}, document.title, pasteSite + 'm/' + messageId );
+function getSingle() {
+    if (!getvars['c']) {
+	    if (api.accessToken) {
+		var args = {
+		    include_annotations: 1,
+		    ids: getvars['m']
+		};
+		api.call('https://alpha-api.app.net/stream/0/channels/messages', 'GET', args, completeSingle, failSingle);
+		if ( history.pushState ) 
+		    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['m']);
+	    } else {
+		//Replace with push for auth
+		window.location = authUrl;
+	    }
+    } else {
+	// have id & channel, unauth call
+	var args = {
+	    include_annotations: 1
+	};
+	api.call('https://alpha-api.app.net/stream/0/channels/' + getvars['c'] + '/messages/' + getvars['m'], 'GET', args, completeSingle, failSingle);
+	if ( history.pushState ) 
+	    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['enc'] );
+    }
+
+
     //Scroll to top.
     $('html, body').animate({scrollTop: '0px'}, 150);
 }
@@ -44,33 +59,38 @@ function completeSingle(response) {
     var resp = response.data;
     if (!resp.created_at)
 	resp = response.data[0];
-  var annotations = resp.annotations;
-  var i = 0;
-  var paste = "";
-  for (; i < annotations.length; ++i)
-  {
-    if (annotations[i].type === 'net.paste-app.clip') {
-      var val = annotations[i].value;
-      if (val.content) {
-        paste = val.content;
-      }
-	var date = resp.created_at;
-	var url = resp.entities.links[0].url;
-    }
-  }
-    $('#yourPaste').html("<h3>Your Paste</h3>" + formatPaste(paste, date, url));
+
+    $('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp));
 }
 
-function formatPaste(paste, date, url, navId) {
-    var formattedDate = new Date(date);
+function formatPaste(resp, navId) {
+    var annotations = resp.annotations;
+    var i = 0;
+    var paste = "";
+    for (; i < annotations.length; ++i)
+    {
+	if (annotations[i].type === 'net.paste-app.clip') {
+	    var val = annotations[i].value;
+	    if (val.content) {
+		paste = val.content;
+	    }
+	    var date = resp.created_at;
+	    var url = resp.entities.links[0].url;
+	}
+    }
+    var formattedDate = new Date(resp.created_at);
+    var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
+    var shortUrl = pasteSite + "m/" + shorty;
     var formatted = "<div class='project'><div class='projectInfo'>";
     if (navId)
-	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' onclick='getSingle(" + navId + ")'>View full-size</button></div></div>";
+	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
     formatted += "<p>" + paste + "</p><ul><li></li>";
     if (formattedDate)
 	formatted += "<li><strong>Posted:</strong> " + formattedDate + "</li>";
+    if (shortUrl)
+	formatted += "<li><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a></li>";
     if (url)
-	formatted += "<li><strong>Permalink:</strong> <a href='" + url + "'>" + url + "</a></li>";
+	formatted += "<li><strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></li>";
     formatted += "</ul><hr/></div></div>";
     return formatted;
 }
@@ -78,6 +98,17 @@ function formatPaste(paste, date, url, navId) {
 function failSingle(response)
 {
   $('#paste-error').html('Failed to load message');
+}
+
+function getChannel() {
+    if (api.accessToken) {
+    var args = {
+	count: 1,
+	channel_types: 'net.paste-app.clips'
+    };
+    api.call('https://alpha-api.app.net/stream/0/channels', 'GET', args,
+             completeChannel, failChannel);
+    }
 }
 
 function completeChannel(response)
@@ -107,21 +138,12 @@ function completeMultiple(response) {
     var j = 0;
     var paste = "";
     var col = "#col1";
+    $("#recentPastesHeader").show();
     for (; j < response.data.length; ++j) {
-	var i = 0;
 	var resp = response.data[j];
-	for (; i < resp.annotations.length; ++i)
-	    if (resp.annotations[i].type === 'net.paste-app.clip') {
-		var val = resp.annotations[i].value;
-		if (val.content) {
-		    paste = val.content;
-		}
-		var date = resp.created_at;
-		var url = resp.entities.links[0].url;
-	    }
 	if (j == Math.floor(.5 * multipleCount))
 	    col = "#col2";
-	$(col).append(formatPaste(paste, date, url, resp.id));
+	$(col).append(formatPaste(resp, true));
     }
 
     //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
@@ -312,17 +334,60 @@ api.call = function (url, type, args, success, failure, data)
   header.fail($.proxy(callFailure, complete));
 };
 
-function getUrlVars() {
-    var vars = [], hash;
-    if (window.location.href.indexOf('/m/') > 0) 
-	vars["m"] = window.location.href.split('/m/')[1].split("/")[0];
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    var i = 0;
-    for (i = 0; i < hashes.length; i += 1)
-    {
-	hash = hashes[i].split('=');
-	vars.push(hash[0]);
-	vars[hash[0]] = hash[1];
+function getUrlVars(url) {
+    var vars = [];
+    if (!url) {
+	//Passed in url is for local view links.
+	//If no url passed in, we should check authentication.
+	url = $.url();
+	if (url.fparam('access_token') && url.fparam('access_token').length > 0) {
+	    api.accessToken = url.fparam('access_token');
+	    $(".loggedOut").hide();
+	    $(".loggedIn").show();
+	    //Hide the access token
+	    if ( history.pushState ) 
+		history.pushState( {}, document.title, url.attr('source').split("#")[0]);
+	}
+    }
+    if (url.segment(1) == "m") {
+	if (!isNaN(url.segment(2))) {
+	    vars['m'] = url.segment(2);
+	} else {
+	    vars = getShortVars(url.segment(2));
+
+	}
     }
     return vars;
+};
+
+function getShortVars(shorty) {
+    var vars = [];
+    splits = shorty.split("-");
+    if (splits.length > 0) {	
+	vars['enc'] = shorty;
+	vars['c'] = parseInt(splits[0], 36);
+	vars['m'] = parseInt(splits[1], 36);
+    }
+    return vars;
+}
+
+function viewPaste(shorty) {
+    getvars = getShortVars(shorty);
+    getSingle();
+}
+
+function login() {
+    //Force authorization: https://account.app.net/oauth/authorize
+    window.location = authUrl;
+};
+
+function logout() {
+    //Erase token and post list.
+    api.accessToken = '';
+    $("#col1").html("");
+    $("#col2").html("");
+
+    $(".loggedIn").hide();
+    $(".loggedOut").show();
+
 };
