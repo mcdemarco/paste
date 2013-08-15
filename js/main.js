@@ -63,7 +63,9 @@ function completeSingle(response) {
     $('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp));
 }
 
-function formatPaste(resp, navId) {
+function formatPaste(resp, small) {
+    //Small means we need the enlarge link for the paste in a paste list.
+    //Otherwise, we need raw text, user link, etc.
     var annotations = resp.annotations;
     var i = 0;
     var paste = "";
@@ -81,12 +83,20 @@ function formatPaste(resp, navId) {
     var formattedDate = new Date(resp.created_at);
     var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
     var shortUrl = pasteSite + "m/" + shorty;
+    var byline = "@" + resp.user.username;
+    if (!small)
+	byline = "<a href='" + resp.user.canonical_url + "'>" + byline + "</a>";
     var formatted = "<div class='project'><div class='projectInfo'>";
-    if (navId)
+    if (small)
 	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
-    formatted += "<p>" + paste + "</p><ul><li></li>";
+    formatted += "<pre class='reset'>" + paste + "</pre><ul><li></li>";
+    if (!small) {
+	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='3' style='width:99%;'>" + paste + "</textarea>" +
+	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
+    }
     if (formattedDate)
 	formatted += "<li><strong>Posted:</strong> " + formattedDate + "</li>";
+    formatted += "<li><strong>By:</strong> " + byline + "</li>";
     if (shortUrl)
 	formatted += "<li><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a></li>";
     if (url)
@@ -123,8 +133,7 @@ function completeChannel(response)
     api.call('https://alpha-api.app.net/stream/0/channels/' + pasteChannel.id + '/messages', 'GET', args,
              completeMultiple, failMultiple);
   }
-  console.dir(response);
-  //$('#paste-create').show();
+  //console.dir(response);
   $('#paste-create').submit(clickPaste);
 }
 
@@ -156,8 +165,7 @@ function failMultiple(meta)
   console.dir(meta);
 }
 
-function clickPaste(event)
-{
+function clickPaste(event) {
   event.preventDefault();
   if ($('#paste-text').val() !== '')
   {
@@ -173,11 +181,22 @@ function clickPaste(event)
   return false;
 }
 
+function clickRepaste() {
+  if ($('#repaste-text').val() !== '')
+  {
+    if (pasteChannel)
+	createPaste($('#repaste-text').val());
+    else
+	createPasteChannel($('#repaste-text').val());
+  }
+  return false;
+}
+
 function createPaste(text)
 {
-  console.log('Create Paste');
-  console.dir(pasteChannel);
-  console.log(text);
+  //console.log('Create Paste');
+  //console.dir(pasteChannel);
+  //console.log(text);
   var message = {
     text: 'Paste Link is ' + pasteSite + 'm/{message_id}',
     annotations: [{
@@ -192,8 +211,8 @@ function createPaste(text)
 
 function completePaste(response)
 {
-  console.log('completePaste');
-  console.dir(response.data.annotations);
+  //console.log('completePaste');
+  //console.dir(response.data.annotations);
 // Rewrite url if safe.
     if ( history.pushState ) 
 	history.pushState( {}, document.title, pasteSite + 'm/' + response.data.id );
@@ -223,8 +242,8 @@ function createPasteChannel(text)
 
 function completeCreateChannel(response)
 {
-  console.log("complete create");
-  console.dir(response);
+  //console.log("complete create");
+  //console.dir(response);
   pasteChannel = response.data;
   createPaste(this.text);
 }

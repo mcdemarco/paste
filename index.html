@@ -25,10 +25,7 @@ www.typeandgrids.com
 <link rel="stylesheet" href="/css/base.css">
 <link rel="stylesheet" href="/css/themes/type_18.css">
 <link rel="stylesheet" href="/css/themes/color_16a.css">
-
-<style>
-.loggedIn {display:none;}
-</style>
+<link rel="stylesheet" href="/css/paste.css">
 
 <!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -68,14 +65,14 @@ www.typeandgrids.com
 	<!-- Header begins ========================================================================== -->
 	<header class="sixteen columns">
 		<div id="logo">
-			<h1>Paste App</h1>
+			<h1>Paste</h1>
 			<h2>A paste app for app.net</h2>
 		</div>
 		<nav>
 			<ul>
 				<!--li id="login" class="loggedOut"><button onclick="login();">Login</button></li-->
 				<!--li id="logout" class="loggedIn"><button onclick="logout();">Logout</button></li-->
-				<li><button id="workPage">Paste</button></li>
+				<li><button id="workPage">Pastes</button></li>
 				<li><button id="aboutPage">About</button></li>
 			</ul>
 		</nav>
@@ -87,7 +84,7 @@ www.typeandgrids.com
 	<div id="work">
 	
 		<div id="overview" class="sixteen columns">
-			<div id="yourPaste"></div>
+			<div id="yourPaste"><p class="loggedOut">Paste allows you to create and view short text clippings using app.net. You can see the About page for more information about how it works and what it does. To begin:</p></div>
 			<div id="loginRequest" class="loggedOut">
 			  <a href='' class='adn-button' data-type='authorize_v2' data-width="145" data-height="22" >Authorize with App.net</a><script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='//d2zh9g63fcvyrq.cloudfront.net/adn.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'adn-button-js'));</script>
 			 <p>An App.net account is required to create new pastes. You can create an account and sign in by clicking this button.</p>
@@ -126,12 +123,23 @@ www.typeandgrids.com
 			
 			<h3>About paste-app</h3>
 			<p>
-				Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of <a href="https://alpha.app.net/duerig">Jonathon Duerig</a>.  This website was coded by <a href="https://alpha.app.net/mcdemarco">M. C. DeMarco</a>.
+				Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of <a href="https://alpha.app.net/duerig">Jonathon Duerig</a>.  This version was coded by <a href="https://alpha.app.net/mcdemarco">M. C. DeMarco</a>.
 			</p>
+
+			<h4>For users</h4>
+			<p>
+				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account. 
+			</p>
+
+			<h4>For developers</h4>
+			<p>
+				Pastes are messages in a user-owned channel of type net.paste-app.clip.  The paste text itself is contained in an annotation of type net.paste-app.clip, while the message text contains the private link to the paste.  (The public link is a base 36 encoding of the channel and message IDs, which allows retrieval without authentication.)  You can direct the user to the private link (the paste-app.net website) to view the paste or retrieve the message yourself to display within an app.  The code is all client-side and available at <a href="github">https://github.com/mcdemarco/paste</a>.
+			</p>
+
 			
 			<h4>About Type &amp; Grids</h4>
 			<p>
-				Type &amp; Grids is a HTML5 template that focuses on typography and grids. It's responsive which means it looks great on all devices from desktops to laptops to tablets and mobile phones. It's super-customizable and comes with lots of nicely designed type and color themes. Download the <a href="http://www.typeandgrids.com/downloads/type_and_grids_free.zip">free zip file</a> to get started!
+				<a href="http://www.typeandgrids.com/">Type &amp; Grids</a> is a HTML5 template that focuses on typography and grids. It's responsive which means it looks great on all devices from desktops to laptops to tablets and mobile phones. It's super-customizable and comes with lots of nicely designed type and color themes. Download the <a href="http://www.typeandgrids.com/downloads/type_and_grids_free.zip">free zip file</a> to get started!
 			</p>
 
 			<p>
