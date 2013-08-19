@@ -27,6 +27,7 @@ function initialize() {
 }
 
 function getSingle() {
+    failAlert("");
     if (!getvars['c']) {
 	    if (api.accessToken) {
 		var args = {
@@ -89,7 +90,7 @@ function formatPaste(resp, small) {
     var formatted = "<div class='project'><div class='projectInfo'>";
     if (small)
 	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
-    formatted += "<pre class='reset'>" + paste + "</pre><ul><li></li>";
+    formatted += "<pre class='reset'>" + escapeHTML(paste) + "</pre><ul><li></li>";
     if (!small) {
 	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='3' style='width:99%;'>" + paste + "</textarea>" +
 	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
@@ -107,7 +108,7 @@ function formatPaste(resp, small) {
 
 function failSingle(response)
 {
-  $('#paste-error').html('Failed to load message');
+  failAlert('Failed to load message.');
 }
 
 function getChannel() {
@@ -131,16 +132,14 @@ function completeChannel(response)
 	include_annotations: 1
     };
     api.call('https://alpha-api.app.net/stream/0/channels/' + pasteChannel.id + '/messages', 'GET', args,
-             completeMultiple, failMultiple);
+             completeMultiple, failChannel);
   }
   //console.dir(response);
   $('#paste-create').submit(clickPaste);
 }
 
-function failChannel(meta)
-{
-  console.log('Failure getting channel!');
-  console.dir(meta);
+function failChannel(meta) {
+    failAlert('Failed to retrieve paste channel.');
 }
 
 function completeMultiple(response) {
@@ -157,12 +156,6 @@ function completeMultiple(response) {
 
     //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
     //$(".project:odd").appendTo("#col2");
-}
-
-function failMultiple(meta)
-{
-  console.log('Failure retrieving multiple pastes!');
-  console.dir(meta);
 }
 
 function clickPaste(event) {
@@ -379,6 +372,19 @@ function getUrlVars(url) {
     return vars;
 };
 
+function escapeHTML(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function failAlert(msg) {
+  $('#paste-error').html(msg);
+}
+
 function getShortVars(shorty) {
     var vars = [];
     splits = shorty.split("-");
@@ -388,11 +394,6 @@ function getShortVars(shorty) {
 	vars['m'] = parseInt(splits[1], 36);
     }
     return vars;
-}
-
-function viewPaste(shorty) {
-    getvars = getShortVars(shorty);
-    getSingle();
 }
 
 function login() {
@@ -410,3 +411,8 @@ function logout() {
     $(".loggedOut").show();
 
 };
+
+function viewPaste(shorty) {
+    getvars = getShortVars(shorty);
+    getSingle();
+}
