@@ -9,7 +9,11 @@ div#paste-error {
     font-weight:bold;
 }
 
-
+/*
+pre.prettyprint {
+    background-color:#fefefe;
+}
+*/
 
 /* overrides for Types&Grids base.css */
 
@@ -19,8 +23,9 @@ textarea {
 
 pre.reset {
     font-family:monospace;
-    color: #111;
+    color:#111;
 }
+
 
 /* http://webreflection.blogspot.com/2006/12/reset-element-css.html */
 
