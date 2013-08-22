@@ -62,6 +62,7 @@ function completeSingle(response) {
 	resp = response.data[0];
 
     $('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp));
+    rePrettify();
 }
 
 function formatPaste(resp, small) {
@@ -90,7 +91,7 @@ function formatPaste(resp, small) {
     var formatted = "<div class='project'><div class='projectInfo'>";
     if (small)
 	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
-    formatted += "<pre class='reset'>" + escapeHTML(paste) + "</pre><ul><li></li>";
+    formatted += "<pre class='reset prettyprint'>" + escapeHTML(paste) + "</pre><ul><li></li>";
     if (!small) {
 	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='3' style='width:99%;'>" + paste + "</textarea>" +
 	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
@@ -156,6 +157,7 @@ function completeMultiple(response) {
 
     //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
     //$(".project:odd").appendTo("#col2");
+    rePrettify();
 }
 
 function clickPaste(event) {
@@ -411,6 +413,10 @@ function logout() {
     $(".loggedOut").show();
 
 };
+
+function rePrettify() {
+    PR.prettyPrint();    
+}
 
 function viewPaste(shorty) {
     getvars = getShortVars(shorty);
