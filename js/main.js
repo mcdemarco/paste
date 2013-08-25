@@ -1,6 +1,6 @@
-//Original paste-app code for app.net from @duerig.
+//main.js for paste-app.net
+//Based on original paste-app code for app.net from @duerig.
 //This version by @mcdemarco.
-//Requires mod_rewrite for http://paste-app.net/m/<message#>
 
 var api = {
     client_id: '<APP_ID>'
@@ -132,6 +132,15 @@ function completeMultiple(response) {
     //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
     //$(".project:odd").appendTo("#col2");
     //reHighlight();
+}
+
+function clickClose(event) {
+    //Erase paste.
+    $("#yourPaste").html("");
+    //Clear selected paste and URL.
+    getvars = [];
+    if ( history.pushState ) 
+	history.pushState( {}, document.title, pasteSite);
 }
 
 function clickPaste(event) {
@@ -394,8 +403,9 @@ function formatPaste(resp, small) {
     } else {
 	formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
 	formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
-	formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>" +
-	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</div>";
+	formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
+	formatted += ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "");
+	formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
     }
     formatted += "<hr/></div>";
     return formatted;

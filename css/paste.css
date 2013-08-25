@@ -18,6 +18,7 @@ hr {
 div#paste-error {
     text-align:center;
     font-weight:bold;
+    color: #823332;
 }
 
 pre, textarea {
@@ -25,8 +26,12 @@ pre, textarea {
     line-height: normal;
 }
 
-div.view pre {
+div.view pre code.undefined {
     white-space: pre-wrap;
+}
+
+div.view pre code {
+    overflow-y:auto;
 }
 
 .byline {
@@ -42,8 +47,9 @@ div.small pre {
     background-color: #D3D4B6;
     border: 1px solid gray;
     padding: 3px;
+    white-space: pre-wrap;
     overflow: hidden;
-    max-height: 200px;
+    max-height: 175px;
 }
 
 footer div {
