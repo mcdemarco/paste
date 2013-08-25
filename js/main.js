@@ -137,10 +137,10 @@ function completeMultiple(response) {
 function clickClose(event) {
     //Erase paste.
     $("#yourPaste").html("");
-    //Clear selected paste and URL.
-    getvars = [];
+    //Cleanup.
     if ( history.pushState ) 
 	history.pushState( {}, document.title, pasteSite);
+    $('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function clickPaste(event) {
