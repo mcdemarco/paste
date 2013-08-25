@@ -7,8 +7,17 @@ var api = {
 };
 
 var pasteSite = "http://paste-app.net/";
+
+//To force authorization: https://account.app.net/oauth/authorize etc.
 var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=messages,public_messages";
+
+//General channel endpoint:
+var channelUrl = 'https://alpha-api.app.net/stream/0/channels';
+//Users create their own pastes channel(s), so we use this endpoint for retrieving it/them:
+var myChannelUrl = 'https://alpha-api.app.net/stream/0/users/me/channels';
+
 var pasteChannel = null;
+//Number of recent pastes to retrieve for logged-in user.
 var multipleCount = 8;
 var getvars = [];
 
@@ -34,7 +43,7 @@ function getSingle() {
 		    include_annotations: 1,
 		    ids: getvars['m']
 		};
-		api.call('https://alpha-api.app.net/stream/0/channels/messages', 'GET', args, completeSingle, failSingle);
+		api.call(channelUrl + '/messages', 'GET', args, completeSingle, failSingle);
 		if ( history.pushState ) 
 		    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['m']);
 	    } else {
@@ -42,15 +51,14 @@ function getSingle() {
 		window.location = authUrl;
 	    }
     } else {
-	// have id & channel, unauth call
+	//We have the id & channel so can make an unauthorized call.
 	var args = {
 	    include_annotations: 1
 	};
-	api.call('https://alpha-api.app.net/stream/0/channels/' + getvars['c'] + '/messages/' + getvars['m'], 'GET', args, completeSingle, failSingle);
+	api.call(channelUrl + '/' + getvars['c'] + '/messages/' + getvars['m'], 'GET', args, completeSingle, failSingle);
 	if ( history.pushState ) 
 	    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['enc'] );
     }
-
 
     //Scroll to top.
     $('html, body').animate({scrollTop: '0px'}, 150);
@@ -61,50 +69,10 @@ function completeSingle(response) {
     if (!resp.created_at)
 	resp = response.data[0];
 
-    $('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp));
-    rePrettify();
-}
-
-function formatPaste(resp, small) {
-    //Small means we need the enlarge link for the paste in a paste list.
-    //Otherwise, we need raw text, user link, etc.
-    var annotations = resp.annotations;
-    var i = 0;
-    var paste = "";
-    for (; i < annotations.length; ++i)
-    {
-	if (annotations[i].type === 'net.paste-app.clip') {
-	    var val = annotations[i].value;
-	    if (val.content) {
-		paste = val.content;
-	    }
-	    var date = resp.created_at;
-	    var url = resp.entities.links[0].url;
-	}
-    }
-    var formattedDate = new Date(resp.created_at);
-    var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
-    var shortUrl = pasteSite + "m/" + shorty;
-    var byline = "@" + resp.user.username;
-    if (!small)
-	byline = "<a href='" + resp.user.canonical_url + "'>" + byline + "</a>";
-    var formatted = "<div class='project'><div class='projectInfo'>";
-    if (small)
-	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
-    formatted += "<pre class='reset prettyprint'>" + escapeHTML(paste) + "</pre><ul><li></li>";
-    if (!small) {
-	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='3' style='width:99%;'>" + paste + "</textarea>" +
-	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
-    }
-    if (formattedDate)
-	formatted += "<li><strong>Posted:</strong> " + formattedDate + "</li>";
-    formatted += "<li><strong>By:</strong> " + byline + "</li>";
-    if (shortUrl)
-	formatted += "<li><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a></li>";
-    if (url)
-	formatted += "<li><strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></li>";
-    formatted += "</ul><hr/></div></div>";
-    return formatted;
+    $('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp)).promise().done(function(){
+	$('textarea#repaste-text').css("height", $("code").css("height"));
+    });
+    $('pre code').each(function(i, e) {hljs.highlightBlock(e, '    ')});
 }
 
 function failSingle(response)
@@ -118,7 +86,7 @@ function getChannel() {
 	count: 1,
 	channel_types: 'net.paste-app.clips'
     };
-    api.call('https://alpha-api.app.net/stream/0/channels', 'GET', args,
+    api.call(myChannelUrl, 'GET', args,
              completeChannel, failChannel);
     }
 }
@@ -132,7 +100,7 @@ function completeChannel(response)
 	count: multipleCount,
 	include_annotations: 1
     };
-    api.call('https://alpha-api.app.net/stream/0/channels/' + pasteChannel.id + '/messages', 'GET', args,
+    api.call(channelUrl + '/' + pasteChannel.id + '/messages', 'GET', args,
              completeMultiple, failChannel);
   }
   //console.dir(response);
@@ -157,7 +125,7 @@ function completeMultiple(response) {
 
     //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
     //$(".project:odd").appendTo("#col2");
-    rePrettify();
+    //reHighlight();
 }
 
 function clickPaste(event) {
@@ -199,8 +167,7 @@ function createPaste(text)
       value: { content: text }
     }]
   };
-  api.call('https://alpha-api.app.net/stream/0/channels/' + pasteChannel.id
-           + '/messages', 'POST', { include_annotations: 1 },
+  api.call(channelUrl + '/' + pasteChannel.id + '/messages', 'POST', { include_annotations: 1 },
            completePaste, failPaste, message);
 }
 
@@ -231,7 +198,7 @@ function createPasteChannel(text)
     auto_subscribe: true,
     readers: { 'public': true }
   };
-  api.call('https://alpha-api.app.net/stream/0/channels', 'POST', {},
+  api.call(channelUrl, 'POST', {},
            $.proxy(completeCreateChannel, context), failCreateChannel, channel);
 }
 
@@ -387,6 +354,48 @@ function failAlert(msg) {
   $('#paste-error').html(msg);
 }
 
+function formatPaste(resp, small) {
+    //Small means we need the enlarge link for the paste in a paste list.
+    //Otherwise, we need raw text, user link, etc.
+    var annotations = resp.annotations;
+    var i = 0;
+    var paste = "";
+    for (; i < annotations.length; ++i)
+    {
+	if (annotations[i].type === 'net.paste-app.clip') {
+	    var val = annotations[i].value;
+	    if (val.content) {
+		paste = val.content;
+	    }
+	    var date = resp.created_at;
+	    var url = resp.entities.links[0].url;
+	}
+    }
+    var formattedDate = new Date(resp.created_at);
+    var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
+    var shortUrl = pasteSite + "m/" + shorty;
+    var byline = "@" + resp.user.username;
+    if (!small)
+	byline = "<a href='" + resp.user.canonical_url + "'>" + byline + "</a>";
+    var formatted = "<div class='project'><div class='projectInfo'>";
+    if (small)
+	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
+    formatted += "<pre class='reset'>" + ((!small) ? "<code>" : "") + escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
+    if (!small) {
+	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>" +
+	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
+    }
+    if (formattedDate)
+	formatted += "<li><strong>Posted:</strong> " + formattedDate + "</li>";
+    formatted += "<li><strong>By:</strong> " + byline + "</li>";
+    if (shortUrl)
+	formatted += "<li><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a></li>";
+    if (url)
+	formatted += "<li><strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></li>";
+    formatted += "</ul><hr/></div></div>";
+    return formatted;
+}
+
 function getShortVars(shorty) {
     var vars = [];
     splits = shorty.split("-");
@@ -399,7 +408,6 @@ function getShortVars(shorty) {
 }
 
 function login() {
-    //Force authorization: https://account.app.net/oauth/authorize
     window.location = authUrl;
 };
 
@@ -413,10 +421,6 @@ function logout() {
     $(".loggedOut").show();
 
 };
-
-function rePrettify() {
-    PR.prettyPrint();    
-}
 
 function viewPaste(shorty) {
     getvars = getShortVars(shorty);

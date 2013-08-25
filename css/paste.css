@@ -22,6 +22,10 @@ textarea {
 pre.reset {
     font-family:monospace;
     color:#111;
+    line-height:normal;
+    font-size:13px!important;
+    font-weight:normal;
+    font-style:normal;
 }
 
 
