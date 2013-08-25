@@ -30,8 +30,12 @@ function initialize() {
     if (getvars['m']) {
 	getSingle();
     }
-    if (api.accessToken)
+    if (api.accessToken) {
 	getChannel();
+	$(".loggedIn").show();
+    } else {
+	$(".loggedOut").show();
+    }
     $("a.adn-button").attr('href',authUrl);
 }
 
@@ -375,24 +379,20 @@ function formatPaste(resp, small) {
     var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
     var shortUrl = pasteSite + "m/" + shorty;
     var byline = "@" + resp.user.username;
-    if (!small)
-	byline = "<a href='" + resp.user.canonical_url + "'>" + byline + "</a>";
-    var formatted = "<div class='project'><div class='projectInfo'>";
-    if (small)
-	formatted += "<div class='projectNav'><div class='projectNavEnlarge'><button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button></div></div>";
-    formatted += "<pre class='reset'>" + ((!small) ? "<code>" : "") + escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
-    if (!small) {
-	formatted += "<li><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>" +
-	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</li>";
+
+    var formatted = "<div class='paste" + ((small) ? " small": " view") + "'>";
+    formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div>";
+    formatted += "<pre>" + ((!small) ? "<code>" : "") + escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
+
+    if (small) {
+	formatted += "<button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button>";
+    } else {
+	formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
+	formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
+	formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>" +
+	    ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "") + "</div>";
     }
-    if (formattedDate)
-	formatted += "<li><strong>Posted:</strong> " + formattedDate + "</li>";
-    formatted += "<li><strong>By:</strong> " + byline + "</li>";
-    if (shortUrl)
-	formatted += "<li><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a></li>";
-    if (url)
-	formatted += "<li><strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></li>";
-    formatted += "</ul><hr/></div></div>";
+    formatted += "<hr/></div>";
     return formatted;
 }
 

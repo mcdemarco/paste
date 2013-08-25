@@ -13,7 +13,7 @@ Each paste has a public link that can be viewed without logging in to app.net, a
 sausage
 -------
 
-Pastes are messages in a user-owned channel of type net.paste-app.clip.  The paste text itself is contained in an annotation of type net.paste-app.clip, while the message text contains the private link to the paste.  (The public link is a base 36 encoding of the channel and message IDs, which allows retrieval without authentication.)  You can direct the user to the private link (the paste-app.net website) to view the paste or retrieve the message yourself to display within an app.  The code is all client-side and available at github.
+Pastes are messages in a user-created channel of type net.paste-app.clip.  The paste text itself is contained in an annotation of type net.paste-app.clip, while the message text contains the private link to the paste.  (The public link is a base 36 encoding of the channel and message IDs, which allows retrieval without authentication.)  You can direct the user to the private link (the paste-app.net website) to view the paste or retrieve the message yourself to display within an app.  The code is all client-side and available at github.
 
 libraries
 ---------

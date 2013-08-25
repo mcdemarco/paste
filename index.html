@@ -1,101 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
 <!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
 <!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
 <!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
 <head>
-<meta charset="utf-8">
 
-<!--
-••••••••••••••••••••••••
+	<!-- Basic Page Needs
+  ================================================== -->
+	<meta charset="utf-8">
+	<title>Paste App for app.net</title>
+	<meta name="description" content="Paste app for app.net">
+	<meta name="author" content="@mcdemarco">
 
-Powered by Type & Grids™
-www.typeandgrids.com
+	<!-- Mobile Specific Metas
+  ================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-••••••••••••••••••••••••
--->
+	<!-- CSS
+  ================================================== -->
+	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/skeleton.css">
+	<link rel="stylesheet" href="/css/layout.css">
+	<link rel="stylesheet" href="/css/paste.css">
 
-<title>Paste App for app.net</title>
-<meta name="description" content="Paste app for app.net">
-<meta name="author" content="@mcdemarco">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!--link rel="stylesheet" href="/css/libs/default.css"-->
+	<link rel="stylesheet" title="Pojoaque" href="/css/libs/pojoaque.css">
+	<link rel="alternate stylesheet" title="Google Code" href="/css/libs/googlecode.css">
+	<link rel="alternate stylesheet" title="Tomorrow Night" href="/css/libs/tomorrow-night.css">
+	<link rel="alternate stylesheet" title="XCode" href="/css/libs/xcode.css">
 
-<!-- CSS
-================================================================================================= -->
-<link rel="stylesheet" href="/css/base.css">
-<link rel="stylesheet" href="/css/themes/type_18.css">
-<link rel="stylesheet" href="/css/themes/color_16a.css">
-<link rel="stylesheet" href="/css/paste.css">
-<!--link rel="stylesheet" href="/css/libs/default.css"-->
-<link rel="stylesheet" title="Pojoaque" href="/css/libs/pojoaque.css">
-<link rel="alternate stylesheet" title="Google Code" href="/css/libs/googlecode.css">
-<link rel="alternate stylesheet" title="Tomorrow Night" href="/css/libs/tomorrow-night.css">
-<link rel="alternate stylesheet" title="XCode" href="/css/libs/xcode.css">
+	<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
 
-<!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
+	<!-- Favicons
+  ================================================== -->
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
 
-<!-- Favicons
-================================================================================================= -->
-<link rel="shortcut icon" href="/images/favicons/favicon.ico">
-<link rel="apple-touch-icon" href="/images/favicons/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/apple-touch-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/apple-touch-icon-114x114.png">
-
-<!-- JS
-================================================================================================= -->
-<script src="/js/libs/modernizr.min.js"></script>
-<script src="/js/libs/jquery-1.8.3.min.js"></script>
-<script src="/js/libs/jquery.easing.1.3.min.js"></script>
-<script src="/js/libs/jquery.fitvids.js"></script>
-<script src="/js/libs/purl.js"></script>
-<script src="/js/libs/highlight.pack.js"></script>
-  <script src="/js/main.js"></script>
-  <script>
-    $(document).ready(initialize);
-  </script>
-<script src="/js/script.js"></script>
+	<!-- JS
+  ================================================================================================= -->
+	<script src="/js/libs/jquery-1.8.3.min.js"></script>
+	<script src="/js/libs/purl.js"></script>
+	<script src="/js/libs/highlight.pack.js"></script>
+	<script src="/js/main.js"></script>
+	<script>
+	  $(document).ready(initialize);
+	</script>
 
 </head>
 <body>
 
-<!-- Write preloader to page - this allows the site to load for users with JS disabled -->
-<script type="text/javascript">
-	document.write("<div id='sitePreloader'><div id='preloaderImage'><img src='/images/site_preloader.gif' alt='Preloader' /></div></div>");
-</script>
 
-<div class="container">
-	
-	<!-- Header begins ========================================================================== -->
-	<header class="sixteen columns">
-		<div id="logo">
-			<h1>Paste</h1>
-			<h2>A paste app for app.net</h2>
+
+	<!-- Primary Page Layout
+	================================================== -->
+
+	<!-- Delete everything in this .container and get started on your own site! -->
+
+	<div class="container">
+		<div class="sixteen columns">
+			<h1 class="remove-bottom" style="margin-top: 40px">Paste</h1>
+			<h5>A paste app for app.net</h5>
+			<hr />
 		</div>
-		<nav>
-			<ul>
-				<!--li id="login" class="loggedOut"><button onclick="login();">Login</button></li-->
-				<!--li id="logout" class="loggedIn"><button onclick="logout();">Logout</button></li-->
-				<li><button id="workPage">Pastes</button></li>
-				<li><button id="aboutPage">About</button></li>
-			</ul>
-		</nav>
-		<hr />
-	</header>
-	<!-- Header ends ============================================================================ -->
-	
-	<!-- Work page begins ======================================================================= -->
-	<div id="work">
-	
+
 		<div id="overview" class="sixteen columns">
 			<div id="paste-error"></div>
-			<div id="yourPaste"><p class="loggedOut">Paste allows you to create and view short text clippings using app.net. You can see the About page for more information about how it works and what it does. To begin:</p></div>
-			<div id="loginRequest" class="loggedOut">
+			<div id="yourPaste"><p class="loggedOut" style="display:none;">Paste allows you to create and view short text clippings using app.net. You can see the About page for more information about how it works and what it does. To begin:</p></div>
+			<div id="loginRequest" class="loggedOut" style="display:none;">
 			  <a href='' class='adn-button' data-type='authorize_v2' data-width="145" data-height="22" >Authorize with App.net</a><script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='//d2zh9g63fcvyrq.cloudfront.net/adn.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'adn-button-js'));</script>
 			 <p>An App.net account is required to create new pastes. You can create an account and sign in by clicking this button.</p>
 			</div>
-			<div id="newPaste" class="loggedIn">
+			<div id="newPaste" class="loggedIn" style="display:none;">
 			 <h3>New Paste</h3>
 			 <div>
 			  <form id="paste-create">
@@ -104,86 +83,39 @@ www.typeandgrids.com
 			  </form>
 			 </div>
 			</div>
-			<div id="recentPastesHeader" class="loggedIn">
+			<div id="recentPastesHeader" class="loggedIn" style="display:none;">
 			 <hr />
 			 <h3>Recent Pastes</h3>
 			</div>
 		</div>
-		
+
+		<!--  two columns of recent pastes -->
 		<div class="eight columns" id="col1">
-		</div><!-- col1 -->
+		</div>
 		
-		<!-- Even numbered projects are dynamically moved into this second column via JS -->
 		<div class="eight columns" id="col2">
 		</div>
-	
-	</div>
-	<!-- Work page ends ========================================================================= -->
-	
-	<!-- About page begins ====================================================================== -->
-	<div id="about">
-		
-		<!-- Column 1 begins ==================================================================== -->
-		<div class="eight columns">
+
+		<div class="sixteen columns loggedOut" id="about" style="display:none;">
 			
 			<h3>About paste-app</h3>
 			<p>
 				Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of <a href="https://alpha.app.net/duerig">Jonathon Duerig</a>.  This version was coded by <a href="https://alpha.app.net/mcdemarco">M. C. DeMarco</a>.
 			</p>
 
-			<h4>For users</h4>
 			<p>
 				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account. 
 			</p>
 
-			<h4>For developers</h4>
 			<p>
-				Pastes are messages in a user-owned channel of type net.paste-app.clip.  The paste text itself is contained in an annotation of type net.paste-app.clip, while the message text contains the private link to the paste.  (The public link is a base 36 encoding of the channel and message IDs, which allows retrieval without authentication.)  You can direct the user to the private link (the paste-app.net website) to view the paste or retrieve the message yourself to display within an app.  The code is all client-side and available at <a href="github">https://github.com/mcdemarco/paste</a>.
+				The code is available at <a href="github">https://github.com/mcdemarco/paste</a>.
 			</p>
-
-			
-			<h4>About Type &amp; Grids</h4>
-			<p>
-				<a href="http://www.typeandgrids.com/">Type &amp; Grids</a> is a HTML5 template that focuses on typography and grids. It's responsive which means it looks great on all devices from desktops to laptops to tablets and mobile phones. It's super-customizable and comes with lots of nicely designed type and color themes. Download the <a href="http://www.typeandgrids.com/downloads/type_and_grids_free.zip">free zip file</a> to get started!
-			</p>
-
-			<p>
-				Type &amp; Grids comes with 19 different type theme CSS files and 28 different color theme CSS files. You can easily mix and match the type and color themes to create a unique design for your site. No CSS knowledge is needed.
-			</p>
-						
 		</div>
-		<!-- Column 1 ends ====================================================================== -->
-		
-		<!-- Column 2 begins ==================================================================== -->
-		<div class="eight columns">
-			
-			<img src="/images/appnet.png" alt="app.net" />
-			
-			<ul class="linedList">
-				<li><strong>Website:</strong> <a href="http://paste-app.net/">paste-app.net</a></li>
-				<li><strong>Join:</strong> <a href="http://join.app.net/">join.app.net</a></li>
-			</ul>
-			
-		</div>
-		<!-- Column 2 ends ====================================================================== -->
-		
-	</div>
-	<!-- About page ends ======================================================================== -->
-	
-	<!-- Footer begins ========================================================================== -->
-	<footer class="sixteen columns">
-		<hr />
-		<ul id="footerLinks">
-			<li><a href="http://paste-app.net">paste-app.net</a></li>
-			<li><a href="https://alpha.app.net/mcdemarco">@mcdemarco</a></li>
-			<li><a href="https://alpha.app.net/duerig">@duerig</a></li>
-			<li><a href="http://www.app.net">app.net</a></li>
-			<!--Notice: The "Powered by Type & Grids" link in the footer is required in the Free version. Upgrade to the Pro version if you would like to remove it. (www.typeandgrids.com/pirates) -->
-			<li>Powered by <a href="http://www.typeandgrids.com" target="_blank">Type &amp; Grids</a></li>
-		</ul>
-	</footer>
-	<!-- Footer ends ============================================================================ -->
-		
-</div><!-- container -->
+
+	</div><!-- container -->
+
+
+<!-- End Document
+================================================== -->
 </body>
 </html>
