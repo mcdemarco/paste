@@ -67,9 +67,25 @@
 			<hr />
 		</div>
 
+		<div class="sixteen columns">
+
+			<h3 class="about">About paste-app</h3>
+
+			<p class="loggedOut" style="display:none;">Paste allows you to create and view short text clippings using app.net. <a href="#" id="more" onclick="toggleAbout();">[more]</a> 
+
+			<p class="about">
+				Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  
+				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account. 
+			</p>
+
+			<p class="about">
+				Paste-app is the brainchild of <a href="https://alpha.app.net/duerig">Jonathon Duerig</a>.  This version was coded by <a href="https://alpha.app.net/mcdemarco">M. C. DeMarco</a>.  The code is available at <a href="github">https://github.com/mcdemarco/paste</a>.
+			</p>
+		</div>
+
 		<div id="overview" class="sixteen columns">
 			<div id="paste-error"></div>
-			<div id="yourPaste"><p class="loggedOut" style="display:none;">Paste allows you to create and view short text clippings using app.net. You can see the About page for more information about how it works and what it does. To begin:</p></div>
+			<div id="yourPaste"><p class="loggedOut">To begin:</p></div>
 			<div id="loginRequest" class="loggedOut" style="display:none;">
 			  <a href='' class='adn-button' data-type='authorize_v2' data-width="145" data-height="22" >Authorize with App.net</a><script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='//d2zh9g63fcvyrq.cloudfront.net/adn.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'adn-button-js'));</script>
 			 <p>An App.net account is required to create new pastes. You can create an account and sign in by clicking this button.</p>
@@ -96,21 +112,16 @@
 		<div class="eight columns" id="col2">
 		</div>
 
-		<div class="sixteen columns loggedOut" id="about" style="display:none;">
-			
-			<h3>About paste-app</h3>
-			<p>
-				Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of <a href="https://alpha.app.net/duerig">Jonathon Duerig</a>.  This version was coded by <a href="https://alpha.app.net/mcdemarco">M. C. DeMarco</a>.
-			</p>
 
-			<p>
-				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account. 
-			</p>
-
-			<p>
-				The code is available at <a href="github">https://github.com/mcdemarco/paste</a>.
-			</p>
-		</div>
+		<footer class="sixteen columns">
+		  <div>
+		    <a href="#" onclick="toggleAbout();">about</a>
+		    <img src="/images/appdotnet-icon-share@2x.png" width="18px" height="18px" />
+		    <a href="http://paste-app.net">paste-app.net</a> 
+		    <img src="/images/appdotnet-icon-share@2x.png" width="18px" height="18px" />
+		    <a href="https://alpha.app.net/mcdemarco">@mcdemarco</a>
+		  </div>
+		</footer>
 
 	</div><!-- container -->
 

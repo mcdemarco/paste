@@ -1,10 +1,17 @@
 /* functional style for paste-app */
 
-.loggedIn {
-    display:none;
+body {
+    background-color: #E6E7D0;
+    border-top: 4px solid #7E8250;
 }
 
-.loggedOut {
+hr {
+    color: #7E8250;
+    background-color: #7E8250;
+    height: 2px;
+}
+
+.loggedIn, .loggedOut, .about {
     display:none;
 }
 
@@ -18,9 +25,13 @@ pre, textarea {
     line-height: normal;
 }
 
+div.view pre {
+    white-space: pre-wrap;
+}
+
 .byline {
     font-style: italic;
-    padding-top: 3px;
+    padding-top: 2px;
 }
 
 div.small .byline a {
@@ -28,10 +39,19 @@ div.small .byline a {
 }
 
 div.small pre {
-    background-color: #e3e3e3;
+    background-color: #D3D4B6;
     border: 1px solid gray;
     padding: 3px;
     overflow: hidden;
     max-height: 200px;
 }
 
+footer div {
+    text-align:center;
+    padding-bottom:20px;
+}
+
+footer div a, footer div img {
+    padding: 5px 10px;
+    vertical-align:middle;
+}

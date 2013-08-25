@@ -19,6 +19,8 @@ var myChannelUrl = 'https://alpha-api.app.net/stream/0/users/me/channels';
 var pasteChannel = null;
 //Number of recent pastes to retrieve for logged-in user.
 var multipleCount = 8;
+//Minimum paste length to trigger highlighting. (It's bad at language detection for short lengths.)
+var highlightMin = 75;
 var getvars = [];
 
 //No console.log in IE.
@@ -32,9 +34,9 @@ function initialize() {
     }
     if (api.accessToken) {
 	getChannel();
-	$(".loggedIn").show();
+	$(".loggedIn").show('slow');
     } else {
-	$(".loggedOut").show();
+	$(".loggedOut").show('slow');
     }
     $("a.adn-button").attr('href',authUrl);
 }
@@ -381,8 +383,11 @@ function formatPaste(resp, small) {
     var byline = "@" + resp.user.username;
 
     var formatted = "<div class='paste" + ((small) ? " small": " view") + "'>";
-    formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div>";
-    formatted += "<pre>" + ((!small) ? "<code>" : "") + escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
+    formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div><pre>";
+    if (!small)
+	formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">"; 
+
+    formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
 
     if (small) {
 	formatted += "<button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button>";
@@ -419,8 +424,17 @@ function logout() {
 
     $(".loggedIn").hide();
     $(".loggedOut").show();
-
 };
+
+function toggleAbout() {
+    $('.about').toggle();
+    $('html, body').animate({scrollTop: '0px'}, 150);
+    if ( $('#more').html() == "[more]" ) 
+	 $('#more').html("[less]");
+    else
+	$('#more').html("[more]");
+};
+
 
 function viewPaste(shorty) {
     getvars = getShortVars(shorty);
