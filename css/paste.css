@@ -55,9 +55,10 @@ div.small pre {
 footer div {
     text-align:center;
     padding-bottom:20px;
+    white-space:nowrap;
 }
 
 footer div a, footer div img {
-    padding: 5px 10px;
+    padding: 5px 1%;
     vertical-align:middle;
 }
