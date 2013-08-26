@@ -9,7 +9,7 @@ var api = {
 var pasteSite = "http://paste-app.net/";
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
-var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=messages,public_messages";
+var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
 
 //General channel endpoint:
 var channelUrl = 'https://alpha-api.app.net/stream/0/channels';
