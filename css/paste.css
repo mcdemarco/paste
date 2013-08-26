@@ -58,7 +58,14 @@ footer div {
     white-space:nowrap;
 }
 
-footer div a, footer div img {
+footer div a {
     padding: 5px 1%;
+}
+
+footer div a, footer div img {
     vertical-align:middle;
+}
+
+h1 a {
+    text-decoration:none;
 }
