@@ -73,3 +73,16 @@ h1 a {
 h1 img {
     margin-left: -7px;
 }
+
+body {
+    font-family: "Avenir Next", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h5 {
+    font-family: "Avenir Next", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+}
+
+strong {
+    font-weight: 600;
+}
