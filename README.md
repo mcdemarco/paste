@@ -1,6 +1,14 @@
 paste
 =====
 
+blurb
+-----
+
+Paste allows you to create and view short text clippings using app.net. Each paste has a public link that can be viewed without logging in to app.net, but an app.net account is required to create pastes.  Logged-in users also see a list of their own recent pastes.
+
+about
+-----
+
 Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of Jonathon Duerig, @duerig, and is based on his code from the first session in the Learning the app.net API 101 patter room:  
 http://orbt.io/OrDC.pdf   
 http://patter-app.net/room.html?channel=14380  
@@ -20,4 +28,6 @@ libraries
 ---------
 
 The app uses jquery, purl.js (for url handling), highlight.js (for code highlighting), and Skeleton, a responsive HTML5 template.  The ransom note font used in the images is BlackCasper by AllencHIU cHIU.
+
+
 
