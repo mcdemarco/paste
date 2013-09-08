@@ -331,18 +331,31 @@ api.call = function (url, type, args, success, failure, data)
 };
 
 function getUrlVars(url) {
+    //Passed in url is for opening local view links.
     var vars = [];
     if (!url) {
-	//Passed in url is for local view links.
-	//If no url passed in, we should check authentication.
+	//If no url passed in explicitly, we should check the current location for authentication info.
 	url = $.url();
-	if (url.fparam('access_token') && url.fparam('access_token').length > 0) {
-	    api.accessToken = url.fparam('access_token');
-	    $(".loggedOut").hide();
-	    $(".loggedIn").show();
-	    //Hide the access token
-	    if ( history.pushState ) 
-		history.pushState( {}, document.title, url.attr('source').split("#")[0]);
+	if ((url.fparam('access_token')  && url.fparam('access_token').length > 0 ) || (localStorage && localStorage["accessToken"])) {
+	    if (url.fparam('access_token')) {
+		api.accessToken = url.fparam('access_token');
+		//Hide the access token
+		if ( history.pushState ) 
+		    history.pushState( {}, document.title, url.attr('source').split("#")[0]);
+		$(".loggedOut").hide();
+		$(".loggedIn").show();
+		if (localStorage) {
+		    try {
+			localStorage["accessToken"] = api.accessToken;
+		    } catch (e) {}
+		}
+	    } else {
+		try {
+		    api.accessToken = localStorage["accessToken"];
+		    $(".loggedOut").hide();
+		    $(".loggedIn").show();
+		} catch (e) {}
+	    }
 	}
     }
     if (url.segment(1) == "m") {
@@ -350,7 +363,6 @@ function getUrlVars(url) {
 	    vars['m'] = url.segment(2);
 	} else {
 	    vars = getShortVars(url.segment(2));
-
 	}
     }
     return vars;
@@ -404,7 +416,7 @@ function formatPaste(resp, small) {
 	formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
 	formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
 	formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
-	formatted += ((api.accessToken) ? "<button onclick='clickRepaste()'>Repaste</button>" : "");
+	formatted += ((api.accessToken) ? "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>" : "");
 	formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
     }
     formatted += "<hr/></div>";
@@ -429,6 +441,11 @@ function login() {
 function logout() {
     //Erase token and post list.
     api.accessToken = '';
+    if (localStorage) {
+	try {
+	    localStorage.removeItem("accessToken");
+	} catch (e) {}
+    }
     $("#col1").html("");
     $("#col2").html("");
 

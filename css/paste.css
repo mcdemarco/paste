@@ -90,3 +90,17 @@ strong {
 a#more {
     color:#878787;
 }
+
+a#logOutButton {
+    border: 2px solid #878787;
+    border-radius: 5px;
+    padding: 0 3px;
+    font-family: "Avenir Next", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    text-decoration:none;
+    background-color:#D3D4B6;
+}
+
+a#logOutButton:hover {
+    background-color:#7E8250;
+}
