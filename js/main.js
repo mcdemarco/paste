@@ -7,14 +7,6 @@ var api = {
 };
 var pasteSite = "http://paste-app.net/";
 
-//To force authorization: https://account.app.net/oauth/authorize etc.
-var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
-
-//General channel endpoint:
-var channelUrl = 'https://alpha-api.app.net/stream/0/channels';
-//Users create their own pastes channel(s), so we use this endpoint for retrieving it/them:
-var myChannelUrl = 'https://alpha-api.app.net/stream/0/users/me/channels';
-
 var pasteChannel = null;
 var annotationArgs = {include_annotations: 1};
 
@@ -22,12 +14,19 @@ var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
 
+//To force authorization: https://account.app.net/oauth/authorize etc.
+var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
+
+
+/* main execution path */
+
 function initialize() {
+    //Parse the url and optionally authenticate.
     getvars = getUrlVars();
     if (getvars['m']) {
 	getSingle();
     }
-    if (api.accessToken) {
+    if (api.accessToken) {//If authenticated, get the user's pastes.
 	getChannel();
 	$(".loggedIn").show('slow');
     } else {
@@ -36,14 +35,52 @@ function initialize() {
     $("a.adn-button").attr('href',authUrl);
 }
 
+function getUrlVars(url) {
+    //Passed in url is for opening local view links.
+    var vars = [];
+    if (!url) {
+	//If no url passed in explicitly, we should check the current location for authentication info.
+	url = $.url();
+	if ((url.fparam('access_token')  && url.fparam('access_token').length > 0 ) || (localStorage && localStorage["accessToken"])) {
+	    if (url.fparam('access_token')) {
+		api.accessToken = url.fparam('access_token');
+		//Hide the access token
+		pushHistory(url.attr('source').split("#")[0]);
+		$(".loggedOut").hide();
+		$(".loggedIn").show();
+		if (localStorage) {
+		    try {
+			localStorage["accessToken"] = api.accessToken;
+		    } catch (e) {}
+		}
+		$.appnet.authorize(api.accessToken,api.client_id);
+	    } else {
+		try {
+		    api.accessToken = localStorage["accessToken"];
+		    $(".loggedOut").hide();
+		    $(".loggedIn").show();
+		    $.appnet.authorize(api.accessToken,api.client_id);
+		} catch (e) {}
+	    }
+	}
+    }
+    if (url.segment(1) == "m") {
+	if (!isNaN(url.segment(2))) {
+	    vars['m'] = url.segment(2);
+	} else {
+	    vars = getShortVars(url.segment(2));
+	}
+    }
+    return vars;
+};
+
 function getSingle() {
     failAlert("");
     if (!getvars['c']) {
 	    if (api.accessToken) {
 		var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
 		promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
-		if ( history.pushState ) 
-		    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['m']);
+		pushHistory(pasteSite + 'm/' + getvars['m']);
 	    } else {
 		//Replace with push for auth
 		window.location = authUrl;
@@ -52,8 +89,7 @@ function getSingle() {
 	//We have the id & channel so can make an unauthenticated call.
 	var promise = $.appnet.message.get(getvars['c'], getvars['m'], annotationArgs);
 	promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
-	if ( history.pushState ) 
-	    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['enc'] );
+	pushHistory(pasteSite + 'm/' + getvars['enc'] );
     }
 
     //Scroll to top.
@@ -91,6 +127,9 @@ function completeChannel(response) {
 	};
 	var promise = $.appnet.message.getChannel(pasteChannel.id, args);
 	promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve paste channel.');});
+    } else {
+	//TODO
+	//For a channel with no pastes (possible deleted?), write no pastes found to col1.
     }
     //Activate the button
     $('#paste-create').submit(clickPaste);
@@ -107,18 +146,55 @@ function completeMultiple(response) {
 	    col = "#col2";
 	$(col).append(formatPaste(resp, true));
     }
-
-    //Need to run the formatting for Types&Grids that moves projects to second column in reverse.
-    //$(".project:odd").appendTo("#col2");
-    //reHighlight();
 }
+
+
+/* channel/paste creation functions */
+
+function createPaste(text) {
+    var message = {
+	text: 'Paste Link is ' + pasteSite + 'm/{message_id}',
+	annotations: [{
+			  type: 'net.paste-app.clip',
+			  value: { content: text }
+		      }]
+    };
+    var promise = $.appnet.message.create(pasteChannel.id, message, annotationArgs);
+    promise.then(completePaste, function (response) {failAlert('Failed to create paste.');});
+}
+
+function completePaste(response) {
+    pushHistory(pasteSite + 'm/' + response.data.id );
+    completeSingle(response);
+    $('#paste-text').val("");
+}
+
+function createPasteChannel(text) {
+    var context = {
+	text: text
+    };
+    var channel = {
+	type: 'net.paste-app.clips',
+	auto_subscribe: true,
+	readers: { 'public': true }
+    };
+    var promise = $.appnet.channel.create(channel);
+    promise.then($.proxy(completeCreateChannel, context), function (response) {failAlert('Failed to create paste channel.');});
+}
+
+function completeCreateChannel(response) {
+    pasteChannel = response.data;
+    createPaste(this.text);
+}
+
+
+/* miscellaneous functions */
 
 function clickClose(event) {
     //Erase paste section.
     $("#yourPaste").html("");
     //Cleanup location bar.
-    if ( history.pushState ) 
-	history.pushState( {}, document.title, pasteSite);
+    pushHistory(pasteSite);
     $('html, body').animate({scrollTop: '0px'}, 150);
 }
 
@@ -135,212 +211,18 @@ function clickPaste(event) {
 }
 
 function clickRepaste() {
-  if ($('#repaste-text').val() !== '')
-  {
-    if (pasteChannel)
-	createPaste($('#repaste-text').val());
-    else
-	createPasteChannel($('#repaste-text').val());
-  }
-  return false;
-}
-
-function createPaste(text)
-{
-  var message = {
-    text: 'Paste Link is ' + pasteSite + 'm/{message_id}',
-    annotations: [{
-      type: 'net.paste-app.clip',
-      value: { content: text }
-    }]
-  };
-  api.call(channelUrl + '/' + pasteChannel.id + '/messages', 'POST', { include_annotations: 1 },
-           completePaste, failPaste, message);
-}
-
-function completePaste(response)
-{
-  //console.log('completePaste');
-  //console.dir(response.data.annotations);
-// Rewrite url if safe.
-    if ( history.pushState ) 
-	history.pushState( {}, document.title, pasteSite + 'm/' + response.data.id );
-  completeSingle(response);
-  $('#paste-text').val("");
-}
-
-function failPaste(meta)
-{
-  console.log('failPaste');
-  console.dir(meta);
-}
-
-function createPasteChannel(text)
-{
-  var context = {
-    text: text
-  };
-  var channel = {
-    type: 'net.paste-app.clips',
-    auto_subscribe: true,
-    readers: { 'public': true }
-  };
-  api.call(channelUrl, 'POST', {},
-           $.proxy(completeCreateChannel, context), failCreateChannel, channel);
-}
-
-function completeCreateChannel(response)
-{
-  //console.log("complete create");
-  //console.dir(response);
-  pasteChannel = response.data;
-  createPaste(this.text);
-}
-
-function failCreateChannel(meta)
-{
-  console.log('failCreateChannel');
-  console.dir(meta);
-}
-
-var callSuccess = function (response)
-{
-  if (response !== null &&
-      response.meta !== undefined &&
-      response.data !== undefined)
-  {
-    if (this.success)
-    {
-      this.success(response);
+    if ($('#repaste-text').val() !== '') {
+	if (pasteChannel)
+	    createPaste($('#repaste-text').val());
+	else
+	    createPasteChannel($('#repaste-text').val());
     }
-  }
-  else
-  {
-    if (this.failure)
-    {
-      console.log('AppNet null response');
-      console.dir(response);
-      this.failure(response.meta);
-    }
-  }
-};
-
-var callFailure = function (request, status, thrown)
-{
-  console.log('AppNet call failed: ' + status + ', thrown: ' + thrown);
-  console.dir(request.responseText);
-  var meta = null;
-  if (request.responseText) {
-    var response = JSON.parse(request.responseText);
-    if (response !== null) {
-      meta = response.meta;
-    }
-  }
-  if (this.failure) {
-    this.failure(meta);
-  }
-};
-
-function makeArgs(args)
-{
-  var result = '';
-  if (args)
-  {
-    result = $.param(args);
-  }
-  if (result !== '')
-  {
-    result = '?' + result;
-  }
-  return result;
+    return false;
 }
 
-function makeData(data)
-{
-  var result = null;
-  if (data)
-  {
-    result = JSON.stringify(data);
-  }
-  return result;
+function deletePaste(id) {
+    //TODO
 }
-
-function makeUrl(pieces)
-{
-  var result = '';
-  var i = 0;
-  for (i = 0; i < pieces.length; i += 1)
-  {
-    if (pieces[i])
-    {
-      result += pieces[i];
-    }
-  }
-  return result;
-}
-
-api.call = function (url, type, args, success, failure, data)
-{
-  var complete = {
-    success: success,
-    failure: failure
-  };
-  var options = {
-    contentType: 'application/json',
-    dataType: 'json',
-    type: type,
-    url: url + makeArgs(args)
-  };
-  if (this.accessToken) {
-    options.headers = { Authorization: 'Bearer ' + this.accessToken };
-  }
-  if (data) {
-    options.data = makeData(data);
-  }
-  var header = $.ajax(options);
-  header.done($.proxy(callSuccess, complete));
-  header.fail($.proxy(callFailure, complete));
-};
-
-function getUrlVars(url) {
-    //Passed in url is for opening local view links.
-    var vars = [];
-    if (!url) {
-	//If no url passed in explicitly, we should check the current location for authentication info.
-	url = $.url();
-	if ((url.fparam('access_token')  && url.fparam('access_token').length > 0 ) || (localStorage && localStorage["accessToken"])) {
-	    if (url.fparam('access_token')) {
-		api.accessToken = url.fparam('access_token');
-		//Hide the access token
-		if ( history.pushState ) 
-		    history.pushState( {}, document.title, url.attr('source').split("#")[0]);
-		$(".loggedOut").hide();
-		$(".loggedIn").show();
-		if (localStorage) {
-		    try {
-			localStorage["accessToken"] = api.accessToken;
-		    } catch (e) {}
-		}
-		$.appnet.authorize(api.accessToken,api.client_id);
-	    } else {
-		try {
-		    api.accessToken = localStorage["accessToken"];
-		    $(".loggedOut").hide();
-		    $(".loggedIn").show();
-		    $.appnet.authorize(api.accessToken,api.client_id);
-		} catch (e) {}
-	    }
-	}
-    }
-    if (url.segment(1) == "m") {
-	if (!isNaN(url.segment(2))) {
-	    vars['m'] = url.segment(2);
-	} else {
-	    vars = getShortVars(url.segment(2));
-	}
-    }
-    return vars;
-};
 
 function escapeHTML(str) {
     return String(str)
@@ -427,6 +309,11 @@ function logout() {
     $(".loggedOut").show();
 };
 
+function pushHistory(newLocation) {
+    if (history.pushState) 
+	history.pushState({}, document.title, newLocation);   
+}
+
 function toggleAbout() {
     $('.about').toggle();
     $('html, body').animate({scrollTop: '0px'}, 150);
@@ -436,12 +323,9 @@ function toggleAbout() {
 	$('#more').html("[more]");
 };
 
-
 function viewPaste(shorty) {
     getvars = getShortVars(shorty);
     getSingle();
 }
 
-function deletePaste(id) {
-    
-}
+/* eof */
