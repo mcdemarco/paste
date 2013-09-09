@@ -11,7 +11,7 @@ about
 
 Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of Jonathon Duerig, @duerig, and is based on his code from the first session in the Learning the app.net API 101 patter room:  
 http://orbt.io/OrDC.pdf   
-http://patter-app.net/room.html?channel=14380  
+http://patter-app.net/room.html?channel=14380
 
 usage
 -----
@@ -27,7 +27,7 @@ Pastes are messages in a user-created channel of type net.paste-app.clip.  The p
 libraries
 ---------
 
-The app uses jquery, purl.js (for url handling), highlight.js (for code highlighting), and Skeleton, a responsive HTML5 template.  The ransom note font used in the images is BlackCasper by AllencHIU cHIU.
+The app uses appnet.js, jquery, purl.js (for url handling), highlight.js (for code highlighting), and Skeleton, a responsive HTML5 template.  The ransom note font used in the images is BlackCasper by AllencHIU cHIU.
 
 
 
