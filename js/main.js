@@ -5,7 +5,6 @@
 var api = {
     client_id: '<APP_ID>'
 };
-
 var pasteSite = "http://paste-app.net/";
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
@@ -17,15 +16,11 @@ var channelUrl = 'https://alpha-api.app.net/stream/0/channels';
 var myChannelUrl = 'https://alpha-api.app.net/stream/0/users/me/channels';
 
 var pasteChannel = null;
-//Number of recent pastes to retrieve for logged-in user.
-var multipleCount = 8;
-//Minimum paste length to trigger highlighting. (It's bad at language detection for short lengths.)
-var highlightMin = 75;
-var getvars = [];
+var annotationArgs = {include_annotations: 1};
 
-//No console.log in IE.
-//if (typeof console == "undefined" || typeof console.log == "undefined") 
-//    var console = { log: function() {} }; 
+var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
+var highlightMin = 75; //Minimum paste length to trigger highlighting. (It's bad at language detection for short lengths.)
+var getvars = [];
 
 function initialize() {
     getvars = getUrlVars();
@@ -45,11 +40,8 @@ function getSingle() {
     failAlert("");
     if (!getvars['c']) {
 	    if (api.accessToken) {
-		var args = {
-		    include_annotations: 1,
-		    ids: getvars['m']
-		};
-		api.call(channelUrl + '/messages', 'GET', args, completeSingle, failSingle);
+		var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
+		promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
 		if ( history.pushState ) 
 		    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['m']);
 	    } else {
@@ -57,11 +49,9 @@ function getSingle() {
 		window.location = authUrl;
 	    }
     } else {
-	//We have the id & channel so can make an unauthorized call.
-	var args = {
-	    include_annotations: 1
-	};
-	api.call(channelUrl + '/' + getvars['c'] + '/messages/' + getvars['m'], 'GET', args, completeSingle, failSingle);
+	//We have the id & channel so can make an unauthenticated call.
+	var promise = $.appnet.message.get(getvars['c'], getvars['m'], annotationArgs);
+	promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
 	if ( history.pushState ) 
 	    history.pushState( {}, document.title, pasteSite + 'm/' + getvars['enc'] );
     }
@@ -81,40 +71,29 @@ function completeSingle(response) {
     $('pre code').each(function(i, e) {hljs.highlightBlock(e, '    ')});
 }
 
-function failSingle(response)
-{
-  failAlert('Failed to load message.');
-}
-
 function getChannel() {
     if (api.accessToken) {
-    var args = {
-	count: 1,
-	channel_types: 'net.paste-app.clips'
-    };
-    api.call(myChannelUrl, 'GET', args,
-             completeChannel, failChannel);
+	var args = {
+	    count: 1,
+	    channel_types: 'net.paste-app.clips'
+	};
+	var promise = $.appnet.channel.getCreated(args);
+	promise.then(completeChannel, function (response) {failAlert('Failed to retrieve paste channel.');});
     }
 }
 
-function completeChannel(response)
-{
-  if (response.data.length > 0)
-  {
-    pasteChannel = response.data[0];
-    var args = {
-	count: multipleCount,
-	include_annotations: 1
-    };
-    api.call(channelUrl + '/' + pasteChannel.id + '/messages', 'GET', args,
-             completeMultiple, failChannel);
-  }
-  //console.dir(response);
-  $('#paste-create').submit(clickPaste);
-}
-
-function failChannel(meta) {
-    failAlert('Failed to retrieve paste channel.');
+function completeChannel(response) {
+    if (response.data.length > 0) {
+	pasteChannel = response.data[0];
+	var args = {
+	    count: multipleCount,
+	    include_annotations: 1
+	};
+	var promise = $.appnet.message.getChannel(pasteChannel.id, args);
+	promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve paste channel.');});
+    }
+    //Activate the button
+    $('#paste-create').submit(clickPaste);
 }
 
 function completeMultiple(response) {
@@ -135,28 +114,24 @@ function completeMultiple(response) {
 }
 
 function clickClose(event) {
-    //Erase paste.
+    //Erase paste section.
     $("#yourPaste").html("");
-    //Cleanup.
+    //Cleanup location bar.
     if ( history.pushState ) 
 	history.pushState( {}, document.title, pasteSite);
     $('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function clickPaste(event) {
-  event.preventDefault();
-  if ($('#paste-text').val() !== '')
-  {
-    if (pasteChannel)
-    {
-      createPaste($('#paste-text').val());
+    event.preventDefault();
+    if ($('#paste-text').val() !== '') {
+	if (pasteChannel) {
+	    createPaste($('#paste-text').val());
+	} else {
+	    createPasteChannel($('#paste-text').val());
+	}
     }
-    else
-    {
-      createPasteChannel($('#paste-text').val());
-    }
-  }
-  return false;
+    return false;
 }
 
 function clickRepaste() {
@@ -172,9 +147,6 @@ function clickRepaste() {
 
 function createPaste(text)
 {
-  //console.log('Create Paste');
-  //console.dir(pasteChannel);
-  //console.log(text);
   var message = {
     text: 'Paste Link is ' + pasteSite + 'm/{message_id}',
     annotations: [{
@@ -349,11 +321,13 @@ function getUrlVars(url) {
 			localStorage["accessToken"] = api.accessToken;
 		    } catch (e) {}
 		}
+		$.appnet.authorize(api.accessToken,api.client_id);
 	    } else {
 		try {
 		    api.accessToken = localStorage["accessToken"];
 		    $(".loggedOut").hide();
 		    $(".loggedIn").show();
+		    $.appnet.authorize(api.accessToken,api.client_id);
 		} catch (e) {}
 	    }
 	}
@@ -466,4 +440,8 @@ function toggleAbout() {
 function viewPaste(shorty) {
     getvars = getShortVars(shorty);
     getSingle();
+}
+
+function deletePaste(id) {
+    
 }
