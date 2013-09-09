@@ -79,7 +79,7 @@ function getSingle() {
     if (!getvars['c']) {
 	    if (api.accessToken) {
 		var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
-		promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
+		promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 		pushHistory(pasteSite + 'm/' + getvars['m']);
 	    } else {
 		//Replace with push for auth
@@ -88,12 +88,9 @@ function getSingle() {
     } else {
 	//We have the id & channel so can make an unauthenticated call.
 	var promise = $.appnet.message.get(getvars['c'], getvars['m'], annotationArgs);
-	promise.then(completeSingle, function (response) {failAlert('Failed to load message.');});
+	promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 	pushHistory(pasteSite + 'm/' + getvars['enc'] );
     }
-
-    //Scroll to top.
-    $('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function completeSingle(response) {
@@ -105,6 +102,9 @@ function completeSingle(response) {
 	$('textarea#repaste-text').css("height", $("code").css("height"));
     });
     $('pre code').each(function(i, e) {hljs.highlightBlock(e, '    ')});
+
+    //Scroll to top.
+    $('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function getChannel() {
@@ -123,10 +123,12 @@ function completeChannel(response) {
 	pasteChannel = response.data[0];
 	var args = {
 	    count: multipleCount,
-	    include_annotations: 1
+	    include_annotations: 1,
+	    include_deleted: 0
 	};
 	var promise = $.appnet.message.getChannel(pasteChannel.id, args);
 	promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve paste channel.');});
+	api.channel_id = pasteChannel.id;
     } else {
 	//TODO
 	//For a channel with no pastes (possible deleted?), write no pastes found to col1.
@@ -220,8 +222,14 @@ function clickRepaste() {
     return false;
 }
 
-function deletePaste(id) {
-    //TODO
+function deletePaste(messageId) {
+    //We know api.channel_id is set and matches.
+    var promise = $.appnet.message.destroy(api.channel_id, messageId);
+    promise.then(completeDelete, function (response) {failAlert('Failed to delete paste.');});
+}
+
+function completeDelete(response) {
+    $("div#yourPaste div.paste").html("<em>Paste deleted.</em><hr />");
 }
 
 function escapeHTML(str) {
@@ -260,20 +268,28 @@ function formatPaste(resp, small) {
     var byline = "@" + resp.user.username;
 
     var formatted = "<div class='paste" + ((small) ? " small": " view") + "'>";
-    formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div><pre>";
-    if (!small)
-	formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">"; 
 
-    formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
-
-    if (small) {
-	formatted += "<button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button>";
+    if (resp.is_deleted) {
+	formatted += "<em>This paste has been deleted by its owner.</em>";
     } else {
-	formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
-	formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
-	formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
-	formatted += ((api.accessToken) ? "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>" : "");
-	formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
+
+	formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div><pre>";
+	if (!small)
+	    formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">"; 
+	formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
+
+	if (small) {
+	    formatted += "<button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button>";
+	} else {
+	    formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
+	    formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
+	    formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
+		 if (api.accessToken) {
+		     formatted += "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>";
+		     formatted += ((resp.channel_id == api.channel_id) ? "<button class='loggedIn' onclick='deletePaste(" + resp.id + ")'>Delete Paste</button>" : "");
+		 }
+	    formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
+	}
     }
     formatted += "<hr/></div>";
     return formatted;
