@@ -151,7 +151,7 @@ function completeMultiple(response) {
 }
 
 
-/* channel/paste creation functions */
+/* channel/paste creation/deletion functions */
 
 function createPaste(text) {
     var message = {
@@ -189,6 +189,17 @@ function completeCreateChannel(response) {
     createPaste(this.text);
 }
 
+function deletePaste(messageId) {
+    //We know api.channel_id is set and matches.
+    var promise = $.appnet.message.destroy(api.channel_id, messageId);
+    promise.then(completeDelete, function (response) {failAlert('Failed to delete paste.');});
+}
+
+function completeDelete(response) {
+    pasteId = response.data.id;
+    $("div#yourPaste div.paste").html("<em>Paste " + pasteId + " deleted.</em><hr />");
+    $("div#small-" + pasteId).html("");
+}
 
 /* miscellaneous functions */
 
@@ -222,16 +233,6 @@ function clickRepaste() {
     return false;
 }
 
-function deletePaste(messageId) {
-    //We know api.channel_id is set and matches.
-    var promise = $.appnet.message.destroy(api.channel_id, messageId);
-    promise.then(completeDelete, function (response) {failAlert('Failed to delete paste.');});
-}
-
-function completeDelete(response) {
-    $("div#yourPaste div.paste").html("<em>Paste deleted.</em><hr />");
-}
-
 function escapeHTML(str) {
     return String(str)
         .replace(/&/g, '&amp;')
@@ -242,7 +243,7 @@ function escapeHTML(str) {
 }
 
 function failAlert(msg) {
-  $('#paste-error').html(msg);
+    $('#paste-error').html(msg);
 }
 
 function formatPaste(resp, small) {
@@ -266,8 +267,9 @@ function formatPaste(resp, small) {
     var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
     var shortUrl = pasteSite + "m/" + shorty;
     var byline = "@" + resp.user.username;
+    var insert = (small) ? "small" : "view";
 
-    var formatted = "<div class='paste" + ((small) ? " small": " view") + "'>";
+    var formatted = "<div id='" + insert + "-" + resp.id + "' class='paste " + insert + "'>";
 
     if (resp.is_deleted) {
 	formatted += "<em>This paste has been deleted by its owner.</em>";
