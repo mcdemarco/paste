@@ -129,9 +129,6 @@ function completeChannel(response) {
 	var promise = $.appnet.message.getChannel(pasteChannel.id, args);
 	promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve paste channel.');});
 	api.channel_id = pasteChannel.id;
-    } else {
-	//TODO
-	//For a channel with no pastes (possible deleted?), write no pastes found to col1.
     }
     //Activate the button
     $('#paste-create').submit(clickPaste);
