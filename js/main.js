@@ -142,11 +142,15 @@ function completeMultiple(response) {
     var paste = "";
     var col = "#col1";
     $("#recentPastesHeader").show();
-    for (; j < response.data.length; ++j) {
-	var resp = response.data[j];
-	if (j == Math.floor(.5 * multipleCount))
-	    col = "#col2";
-	$(col).append(formatPaste(resp, true));
+    if (response.data.length > 0) {
+	for (; j < response.data.length; ++j) {
+	    var resp = response.data[j];
+	    if (j == Math.floor(.5 * multipleCount))
+		col = "#col2";
+	    $(col).append(formatPaste(resp, true));
+	}
+    } else {
+	$(col).html("<em>No pastes found.</em>");
     }
 }
 
