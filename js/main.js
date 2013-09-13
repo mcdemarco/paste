@@ -91,11 +91,11 @@ function getSingle(userChannel) {
 }
 
 function completeSingle(response) {
-	var resp = response.data;
-	if (!resp.created_at)
-		resp = response.data[0];
+	var respd = response.data;
+	if (!respd.created_at)
+		respd = response.data[0];
 
-	$('#yourPaste').html("<h3>Paste " + resp.id + "</h3>" + formatPaste(resp)).promise().done(function(){
+	$('#yourPaste').html("<h3>Paste " + respd.id + "</h3>" + formatPaste(respd)).promise().done(function(){
 		$('textarea#repaste-text').css("height", $("code").css("height"));
 	});
 	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
@@ -140,10 +140,10 @@ function completeMultiple(response) {
 	$("#recentPastesHeader").show();
 	if (response.data.length > 0) {
 		for (; j < response.data.length; ++j) {
-			var resp = response.data[j];
+			var respd = response.data[j];
 			if (j == Math.floor(.5 * multipleCount))
 				col = "#col2";
-			$(col).append(formatPaste(resp, true));
+			$(col).append(formatPaste(respd, true));
 		}
 	} else {
 		$(col).html("<em>No pastes found.</em>");
@@ -166,9 +166,12 @@ function createPaste(text) {
 }
 
 function completePaste(response) {
-	pushHistory(pasteSite + 'm/' + response.data.id );
+	var respd = response.data;
+	pushHistory(pasteSite + 'm/' + respd.id );
 	completeSingle(response);
 	$('#paste-text').val("");
+	$("#recentPastesHeader").show();
+	$("#col1").prepend(formatPaste(respd,true));
 }
 
 function createPasteChannel(text) {
@@ -246,10 +249,10 @@ function failAlert(msg) {
 	$('#paste-error').html(msg);
 }
 
-function formatPaste(resp, small) {
+function formatPaste(respd, small) {
 	//Small means we need the enlarge link for the paste in a paste list.
 	//Otherwise, we need raw text, user link, etc.
-	var annotations = resp.annotations;
+	var annotations = respd.annotations;
 	var i = 0;
 	var paste = "";
 	for (; i < annotations.length; ++i)
@@ -259,23 +262,23 @@ function formatPaste(resp, small) {
 			if (val.content) {
 				paste = val.content;
 			}
-			var date = resp.created_at;
-			var url = resp.entities.links[0].url;
+			var date = respd.created_at;
+			var url = respd.entities.links[0].url;
 		}
 	}
-	var formattedDate = new Date(resp.created_at);
-	var shorty = parseInt(resp.channel_id).toString(36) + "-" + parseInt(resp.id).toString(36);
+	var formattedDate = new Date(respd.created_at);
+	var shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
 	var shortUrl = pasteSite + "m/" + shorty;
-	var byline = "@" + resp.user.username;
+	var byline = "@" + respd.user.username;
 	var insert = (small) ? "small" : "view";
 
-	var formatted = "<div id='" + insert + "-" + resp.id + "' class='paste " + insert + "'>";
+	var formatted = "<div id='" + insert + "-" + respd.id + "' class='paste " + insert + "'>";
 
-	if (resp.is_deleted) {
+	if (respd.is_deleted) {
 		formatted += "<em>This paste has been deleted by its owner.</em>";
 	} else {
 
-		formatted += "<div class='byline'>" + formattedDate + " by <a href='" + resp.user.canonical_url + "'>" + byline + "</a></div><pre>";
+		formatted += "<div class='byline'>" + formattedDate + " by <a href='" + respd.user.canonical_url + "'>" + byline + "</a></div><pre>";
 		if (!small)
 			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">"; 
 		formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
@@ -288,7 +291,7 @@ function formatPaste(resp, small) {
 			formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
 				 if (api.accessToken) {
 					 formatted += "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>";
-					 formatted += ((resp.channel_id == api.channel_id) ? "<button class='loggedIn' onclick='deletePaste(" + resp.id + ")'>Delete Paste</button>" : "");
+					 formatted += ((respd.channel_id == api.channel_id) ? "<button class='loggedIn' onclick='deletePaste(" + respd.id + ")'>Delete Paste</button>" : "");
 				 }
 			formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
 		}
