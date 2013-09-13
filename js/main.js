@@ -5,7 +5,7 @@
 var api = {
 	client_id: '<APP_ID>'
 };
-var pasteSite = "http://paste-app.net/";
+var pasteSite = "http://paste-app.net";
 
 var pasteChannel = null;
 var annotationArgs = {include_annotations: 1};
@@ -76,7 +76,7 @@ function getSingle(userChannel) {
 			if (api.accessToken) {
 				var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
 				promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
-				pushHistory(pasteSite + 'm/' + getvars['m']);
+				pushHistory(pasteSite + '/m/' + getvars['m']);
 			} else {
 				//Replace with push for auth
 				window.location = authUrl;
@@ -85,7 +85,7 @@ function getSingle(userChannel) {
 			//We have the id & channel so can make an unauthenticated call.
 			var promise = $.appnet.message.get(getvars['c'], getvars['m'], annotationArgs);
 			promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
-			pushHistory(pasteSite + 'm/' + getvars['enc'] );
+			pushHistory(pasteSite + '/m/' + getvars['enc'] );
 		}
 	}
 }
@@ -100,8 +100,9 @@ function completeSingle(response) {
 	});
 	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
 
-	//Scroll to top.
-	$('html, body').animate({scrollTop: '0px'}, 150);
+	//Scroll to paste.
+	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
+	//$('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function getChannel() {
@@ -150,12 +151,23 @@ function completeMultiple(response) {
 	}
 }
 
+function morePastes() {
+	//Move current pastes into first col.
+	$("#col2").children().each(function() {$(this).appendTo($("#col1"));});
+	//Get an equal number of pastes and put in col2.
+	countPastes = $(".small").length;
+
+	//Scroll to head of col2.
+	window.location.href = window.location.href.split("#")[0] + "#col2";
+	//Flash some animation to indicate what's new.
+
+}
 
 /* channel/paste creation/deletion functions */
 
 function createPaste(text) {
 	var message = {
-		text: 'Paste Link is ' + pasteSite + 'm/{message_id}',
+		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
 		annotations: [{
 						  type: 'net.paste-app.clip',
 						  value: { content: text }
@@ -167,7 +179,7 @@ function createPaste(text) {
 
 function completePaste(response) {
 	var respd = response.data;
-	pushHistory(pasteSite + 'm/' + respd.id );
+	pushHistory(pasteSite + '/m/' + respd.id );
 	completeSingle(response);
 	$('#paste-text').val("");
 	$("#recentPastesHeader").show();
@@ -268,7 +280,7 @@ function formatPaste(respd, small) {
 	}
 	var formattedDate = new Date(respd.created_at);
 	var shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
-	var shortUrl = pasteSite + "m/" + shorty;
+	var shortUrl = pasteSite + "/m/" + shorty;
 	var byline = "@" + respd.user.username;
 	var insert = (small) ? "small" : "view";
 
