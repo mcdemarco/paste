@@ -127,7 +127,7 @@ function completeChannel(response) {
 			include_deleted: 0
 		};
 		var promise = $.appnet.message.getChannel(pasteChannel.id, args);
-		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve paste channel.');});
+		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve pastes.');});
 		api.channel_id = pasteChannel.id;
 	}
 	//Activate the button
@@ -138,6 +138,8 @@ function completeMultiple(response) {
 	var j = 0;
 	var paste = "";
 	var col = "#col1";
+	if (api.lastId)
+		col = "#col2";
 	$("#recentPastesHeader").show();
 	if (response.data.length > 0) {
 		for (; j < response.data.length; ++j) {
@@ -146,21 +148,39 @@ function completeMultiple(response) {
 				col = "#col2";
 			$(col).append(formatPaste(respd, true));
 		}
+		api.lastId = respd.id;
+		api.more = response.meta.more;
+		if (!api.more) {
+			$('div#morePastes button').prop('disabled',true);
+		}
 	} else {
 		$(col).html("<em>No pastes found.</em>");
 	}
 }
 
 function morePastes() {
-	//Move current pastes into first col.
-	$("#col2").children().each(function() {$(this).appendTo($("#col1"));});
-	//Get an equal number of pastes and put in col2.
-	countPastes = $(".small").length;
-
-	//Scroll to head of col2.
-	window.location.href = window.location.href.split("#")[0] + "#col2";
-	//Flash some animation to indicate what's new.
-
+	if (api.more && api.lastId) {
+		//Move current pastes into first col.
+		$("#col2").children().each(function() {$(this).appendTo($("#col1"));});
+		$("#col2").css({opacity: 0.25});
+		//Get an equal number of pastes and put in col2.
+		multipleCount = $(".small").length;
+		var args = {
+			before_id: api.lastId,
+			count: multipleCount,
+			include_annotations: 1,
+			include_deleted: 0
+		};
+		var promise = $.appnet.message.getChannel(pasteChannel.id, args);
+		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve pastes.');});
+		//Scroll to head of col2.
+		window.location.href = window.location.href.split("#")[0] + "#col2";
+		//Flash some animation to indicate what's new.
+		$("#col2").animate({ opacity: 1.0 }, 1500 );
+		
+	} else {
+		alert("No more pastes.");
+	}
 }
 
 /* channel/paste creation/deletion functions */
