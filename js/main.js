@@ -99,10 +99,6 @@ function completeSingle(response) {
 		$('textarea#repaste-text').css("height", $("code").css("height"));
 	});
 	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
-
-	//Scroll to paste.
-	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
-	//$('html, body').animate({scrollTop: '0px'}, 150);
 }
 
 function getChannel() {
@@ -379,6 +375,8 @@ function toggleAbout() {
 function viewPaste(shorty) {
 	getvars = getShortVars(shorty);
 	getSingle();
+	//Scroll to paste.
+	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 }
 
 /* eof */
