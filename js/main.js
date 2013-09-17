@@ -181,12 +181,12 @@ function morePastes() {
 
 /* channel/paste creation/deletion functions */
 
-function createPaste(text) {
+function createPaste(formObject) {
 	var message = {
 		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
 		annotations: [{
 						  type: 'net.paste-app.clip',
-						  value: { content: text }
+						  value: formObject
 					  }]
 	};
 	var promise = $.appnet.message.create(pasteChannel.id, message, annotationArgs);
@@ -197,14 +197,14 @@ function completePaste(response) {
 	var respd = response.data;
 	pushHistory(pasteSite + '/m/' + respd.id );
 	completeSingle(response);
-	$('#paste-text').val("");
+	clearForm();
 	$("#recentPastesHeader").show();
 	$("#col1").prepend(formatPaste(respd,true));
 }
 
-function createPasteChannel(text) {
+function createPasteChannel(formObject) {
 	var context = {
-		text: text
+		formObject: formObject
 	};
 	var channel = {
 		type: 'net.paste-app.clips',
@@ -234,6 +234,12 @@ function completeDelete(response) {
 
 /* miscellaneous functions */
 
+function clearForm() {
+	$('form#paste-create input').each(function () {$(this).val("");});
+	$('form#paste-create textarea').val("");
+	$('form#paste-create select').val("");	
+}
+
 function clickClose(event) {
 	//Erase paste section.
 	$("#yourPaste").html("");
@@ -245,10 +251,11 @@ function clickClose(event) {
 function clickPaste(event) {
 	event.preventDefault();
 	if ($('#paste-text').val() !== '') {
+		var formObject = getFormAsObject($('form#paste-create'));
 		if (pasteChannel) {
-			createPaste($('#paste-text').val());
+			createPaste(formObject);
 		} else {
-			createPasteChannel($('#paste-text').val());
+			createPasteChannel(formObject);
 		}
 	}
 	return false;
@@ -326,6 +333,23 @@ function formatPaste(respd, small) {
 	}
 	formatted += "<hr/></div>";
 	return formatted;
+}
+
+function getFormAsObject($form){
+	var unindexed_array = $form.serializeArray();
+	var indexed_array = {};
+	//Convert name/value to JSON style.
+	//Don't pass empty string values to ADN in order to save annotation space.
+	$.map(unindexed_array, function(n, i){
+		if (n['value'] !== "") {
+			if (n['name'] == "tags") {
+				indexed_array[n['name']] = n['value'].split(/[ ,]+/);
+			} else {
+				indexed_array[n['name']] = n['value'];
+			}
+		}
+	});
+	return indexed_array;
 }
 
 function getShortVars(shorty) {

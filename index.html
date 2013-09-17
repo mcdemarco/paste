@@ -126,7 +126,17 @@
 			 <h3>New Paste</h3>
 			 <div>
 			  <form id="paste-create">
-			    <textarea placeholder="Paste Text Here" id="paste-text" rows="4" style="width:99%;"></textarea>
+			    <input placeholder="Paste Title (Optional)" id="paste-title" name="title" style="width:75%;" />&nbsp; 
+			    <select id="paste-content_type" name="content_type" style="margin-bottom:3px;display:inline-block;">
+			      <option value="" disabled selected>Paste type (optional)</option>
+			      <option value="txt">Plain text</option>
+			      <option value="md">Markdown</option>
+			      <option value="html">HTML text</option>
+			      <option value="code">Code</option>
+			    </select>
+			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6" style="width:99%;margin-bottom:3px;"></textarea>
+
+			    <input placeholder="Paste Tags (Optional)" id="paste-tags" name="tags" style="width:75%;vertical-align:top;"/>
 			    <button>Save</button>
 			  </form>
 			 </div>
