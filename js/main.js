@@ -63,7 +63,7 @@ function getUrlVars(url) {
 		}
 	}
 	return vars;
-};
+}
 
 function getSingle(userChannel) {
 	if (userChannel) {
@@ -308,7 +308,7 @@ function formatPaste(respd, small) {
 
 		formatted += "<div class='byline'>" + formattedDate + " by <a href='" + respd.user.canonical_url + "'>" + byline + "</a></div><pre>";
 		if (!small)
-			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">"; 
+			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">";
 		formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
 
 		if (small) {
@@ -341,7 +341,7 @@ function getShortVars(shorty) {
 
 function login() {
 	window.location = authUrl;
-};
+}
 
 function logout() {
 	//Erase token and post list.
@@ -356,11 +356,11 @@ function logout() {
 
 	$(".loggedIn").hide();
 	$(".loggedOut").show();
-};
+}
 
 function pushHistory(newLocation) {
 	if (history.pushState) 
-		history.pushState({}, document.title, newLocation);   
+		history.pushState({}, document.title, newLocation);
 }
 
 function toggleAbout() {
@@ -370,7 +370,7 @@ function toggleAbout() {
 		 $('#more').html("[less]");
 	else
 		$('#more').html("[more]");
-};
+}
 
 function viewPaste(shorty) {
 	getvars = getShortVars(shorty);
