@@ -26,7 +26,7 @@ function initialize() {
 	if (api.accessToken) {//If we have the token, get the user's pastes, too.
 		$(".loggedOut").hide();
 		$.appnet.authorize(api.accessToken,api.client_id);
-		getChannel().then(getSingle);
+		getChannel();
 		$(".loggedIn").show('slow');
 	} else {//Otherwise, get one paste.
 		getSingle();
@@ -65,11 +65,7 @@ function getUrlVars(url) {
 	return vars;
 }
 
-function getSingle(userChannel) {
-	if (userChannel) {
-		//Passing around the channel to decide whether to show the delete paste button.
-		api.channel_id = userChannel;
-	}
+function getSingle() {
 	if (getvars['m']) {
 		failAlert("");
 		if (!getvars['c']) {
@@ -94,7 +90,6 @@ function completeSingle(response) {
 	var respd = response.data;
 	if (!respd.created_at)
 		respd = response.data[0];
-
 	$('#yourPaste').html("<h3>Paste " + respd.id + "</h3>" + formatPaste(respd)).promise().done(function(){
 		$('textarea#repaste-text').css("height", $("code").css("height"));
 	});
@@ -102,16 +97,13 @@ function completeSingle(response) {
 }
 
 function getChannel() {
-	var deferred = $.Deferred();
-	if (api.accessToken) {
-		var args = {
-			count: 1,
-			channel_types: 'net.paste-app.clips'
-		};
-		var promise = $.appnet.channel.getCreated(args);
-		promise.then(completeChannel, function (response) {failAlert('Failed to retrieve paste channel.');});
-	}
-	return deferred.resolveWith(api.channel_id);
+	//We have the token.
+	var args = {
+		count: 1,
+		channel_types: 'net.paste-app.clips'
+	};
+	var promise = $.appnet.channel.getCreated(args);
+	promise.then(completeChannel, function (response) {failAlert('Failed to retrieve paste channel.');}).then(getSingle);
 }
 
 function completeChannel(response) {
