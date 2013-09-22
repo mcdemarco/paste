@@ -24,6 +24,7 @@ div#paste-error {
 pre, textarea {
     font-family: monospace;
     line-height: normal;
+    margin-bottom:5px;
 }
 
 div.view pre code.undefined {

@@ -263,6 +263,7 @@ function clickRepaste() {
 	return false;
 }
 
+/* mustache escapes the html
 function escapeHTML(str) {
 	return String(str)
 		.replace(/&/g, '&amp;')
@@ -271,59 +272,63 @@ function escapeHTML(str) {
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;');
 }
+*/
 
 function failAlert(msg) {
 	$('#paste-error').html(msg);
 }
 
 function formatPaste(respd, small) {
-	//Small means we need the enlarge link for the paste in a paste list.
+	//Small means the paste is going into the recent pastes list and needs the enlarge link.
 	//Otherwise, we need raw text, user link, etc.
+
+	//Format the response for use in the template.
 	var annotations = respd.annotations;
 	var i = 0;
-	var paste = "";
-	for (; i < annotations.length; ++i)
-	{
+	for (; i < annotations.length; ++i) {
 		if (annotations[i].type === 'net.paste-app.clip') {
-			var val = annotations[i].value;
-			if (val.content) {
-				paste = val.content;
-			}
-			var date = respd.created_at;
-			var url = respd.entities.links[0].url;
+			//respd.annotation = annotations[i];
+			if (annotations[i].value.content)
+				respd.paste = annotations[i].value.content;
 		}
 	}
-	var formattedDate = new Date(respd.created_at);
-	var shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
-	var shortUrl = pasteSite + "/m/" + shorty;
-	var byline = "@" + respd.user.username;
-	var insert = (small) ? "small" : "view";
+	//var formattedDate = new Date(respd.created_at);
+	respd.created_at = (new Date(respd.created_at)).toString();
+	respd.shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
+	respd.small = (small) ? true : false;
+	respd.auth = (api.accessToken) ? true : false;
+	respd.del = (respd.channel_id == api.channel_id) ? true : false;
+	respd.shortUrl = pasteSite + "/m/" + respd.shorty;
+	respd.longUrl = pasteSite + "/m/" + respd.id;
+	respd.flag = (small) ? "small" : "view";
 
-	var formatted = "<div id='" + insert + "-" + respd.id + "' class='paste " + insert + "'>";
+	var template = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
+		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
+		+ "{{^is_deleted}}"
+			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>" 
+			+ "{{#small}}"
+				+ "<pre>{{paste}}</pre>"
+				+ "<button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View full-size</button>"
+			+ "{{/small}}"
+			+ "{{^small}}"
+				+ "<pre><code>{{paste}}</code></pre>"
+				+ "<p><strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
+				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
+				+ "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>{{paste}}</textarea>"
+				+ "{{#auth}}"
+					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
+					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
+				+ "{{/auth}}"
+				+ "<button onclick='clickClose()'>Close Paste</button></div>"
+			+ "{{/small}}"
+		+ "{{/is_deleted}}<hr/></div>";
 
-	if (respd.is_deleted) {
-		formatted += "<em>This paste has been deleted by its owner.</em>";
-	} else {
+//omitted
+	//	var url = respd.entities.links[0].url;
+//			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">";
 
-		formatted += "<div class='byline'>" + formattedDate + " by <a href='" + respd.user.canonical_url + "'>" + byline + "</a></div><pre>";
-		if (!small)
-			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">";
-		formatted += escapeHTML(paste) + ((!small) ? "</code>" : "") + "</pre><ul><li></li>";
-
-		if (small) {
-			formatted += "<button class='enlargeButton' id='"+ shorty +"' onclick='viewPaste(this.id)'>View full-size</button>";
-		} else {
-			formatted += "<p><strong>Public link:</strong> <a href='" + shortUrl + "'>" + shortUrl + "</a><br />";
-			formatted += "<strong>Private link:</strong> <a href='" + url + "'>" + url + "</a></p>";
-			formatted += "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>" + paste + "</textarea>";
-				 if (api.accessToken) {
-					 formatted += "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>";
-					 formatted += ((respd.channel_id == api.channel_id) ? "<button class='loggedIn' onclick='deletePaste(" + respd.id + ")'>Delete Paste</button>" : "");
-				 }
-			formatted += "<button onclick='clickClose()'>Close Paste</button></div>";
-		}
-	}
-	formatted += "<hr/></div>";
+	var formatted = $.mustache(template, respd); 
+	//process template to formatted
 	return formatted;
 }
 
