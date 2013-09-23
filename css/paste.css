@@ -40,6 +40,11 @@ div.view pre code {
     padding-top: 2px;
 }
 
+.tags {
+    font-style: italic;
+    vertical-align: top;
+}
+
 div.small .byline a {
     text-decoration: none;
 }

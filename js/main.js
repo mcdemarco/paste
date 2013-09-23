@@ -17,6 +17,31 @@ var getvars = [];
 //To force authorization: https://account.app.net/oauth/authorize etc.
 var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
 
+//Mustache template for pastes.
+var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
+		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
+		+ "{{^is_deleted}}"
+			+ "<h5>{{annotation.title}}</h5>"
+			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>" 
+			+ "{{#small}}"
+				+ "<pre>{{annotation.content}}</pre>{{#annotation}}<span class='tags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}"
+				+ "<button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View</button>"
+			+ "{{/small}}"
+			+ "{{^small}}"
+				+ "<pre><code class='{{highlightClass}}'>{{annotation.content}}</code></pre>"
+				+ "<p><strong>Tags:</strong> {{#annotation}}{{#tags}}{{.}} {{/tags}}{{/annotation}}<br />"
+				+ "<strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
+				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
+				+ "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>{{annotation.content}}</textarea>"
+				+ "{{#auth}}"
+					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
+					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
+				+ "{{/auth}}"
+				+ "<button onclick='clickClose()'>Close Paste</button></div>"
+			+ "{{/small}}"
+		+ "{{/is_deleted}}<hr/></div>";
+
+var compiledTemplate = Mustache.compile(stringTemplate);
 
 /* main execution path */
 
@@ -94,6 +119,10 @@ function completeSingle(response) {
 		$('textarea#repaste-text').css("height", $("code").css("height"));
 	});
 	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
+	if ($('#yourPaste h5').html() != "") {
+		$('#yourPaste h3').html($('#yourPaste h5').html());
+		$('#yourPaste h5').hide();
+	}
 }
 
 function getChannel() {
@@ -174,6 +203,7 @@ function morePastes() {
 /* channel/paste creation/deletion functions */
 
 function createPaste(formObject) {
+	failAlert("");
 	var message = {
 		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
 		annotations: [{
@@ -254,6 +284,8 @@ function clickPaste(event) {
 }
 
 function clickRepaste() {
+	//Needs rewrite to populate paste form.
+	/*
 	if ($('#repaste-text').val() !== '') {
 		if (pasteChannel)
 			createPaste($('#repaste-text').val());
@@ -261,38 +293,26 @@ function clickRepaste() {
 			createPasteChannel($('#repaste-text').val());
 	}
 	return false;
+	*/
 }
-
-/* mustache escapes the html
-function escapeHTML(str) {
-	return String(str)
-		.replace(/&/g, '&amp;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
-}
-*/
 
 function failAlert(msg) {
 	$('#paste-error').html(msg);
 }
 
 function formatPaste(respd, small) {
-	//Small means the paste is going into the recent pastes list and needs the enlarge link.
-	//Otherwise, we need raw text, user link, etc.
+	//Small means the paste is going into the recent pastes list and needs the enlarge button.
+	//Otherwise, it needs raw text, repaste button, user link, etc.
 
-	//Format the response for use in the template.
+	//Flatten the annotations for use in the template.
 	var annotations = respd.annotations;
 	var i = 0;
 	for (; i < annotations.length; ++i) {
 		if (annotations[i].type === 'net.paste-app.clip') {
-			//respd.annotation = annotations[i];
-			if (annotations[i].value.content)
-				respd.paste = annotations[i].value.content;
+			respd.annotation = annotations[i].value;
 		}
 	}
-	//var formattedDate = new Date(respd.created_at);
+	//Add more info for use by the template.
 	respd.created_at = (new Date(respd.created_at)).toString();
 	respd.shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
 	respd.small = (small) ? true : false;
@@ -302,32 +322,25 @@ function formatPaste(respd, small) {
 	respd.longUrl = pasteSite + "/m/" + respd.id;
 	respd.flag = (small) ? "small" : "view";
 
-	var template = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
-		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
-		+ "{{^is_deleted}}"
-			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>" 
-			+ "{{#small}}"
-				+ "<pre>{{paste}}</pre>"
-				+ "<button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View full-size</button>"
-			+ "{{/small}}"
-			+ "{{^small}}"
-				+ "<pre><code>{{paste}}</code></pre>"
-				+ "<p><strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
-				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
-				+ "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>{{paste}}</textarea>"
-				+ "{{#auth}}"
-					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
-					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
-				+ "{{/auth}}"
-				+ "<button onclick='clickClose()'>Close Paste</button></div>"
-			+ "{{/small}}"
-		+ "{{/is_deleted}}<hr/></div>";
+	//Determine highlighting type for content.
+	if (respd.annotation.content) {
+		if (respd.annotation.content_type) {
+			switch (respd.annotation.content_type) {
+				case "text":
+					respd.highlightClass =  "no-highlight";
+					break;
+				case "html":
+					respd.highlightClass =  "xml";
+					break;
+				default:
+					respd.highlightClass = respd.annotation.content_type;
+			}
+		} else if (respd.annotation.content.length < highlightMin) {//Turn off autodetection for short content.
+			respd.highlightClass = "no-highlight";
+		}//else autodetect
+	}
 
-//omitted
-	//	var url = respd.entities.links[0].url;
-//			formatted += "<code" + ((paste.length < highlightMin) ? " class='no-highlight'"  : "") + ">";
-
-	var formatted = $.mustache(template, respd); 
+	var formatted = compiledTemplate(respd);
 	//process template to formatted
 	return formatted;
 }
