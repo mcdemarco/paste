@@ -257,6 +257,7 @@ function completeDelete(response) {
 /* miscellaneous functions */
 
 function clearForm() {
+	event.preventDefault();
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
@@ -280,6 +281,8 @@ function clickPaste(event) {
 			createPasteChannel(formObject);
 		}
 	}
+	//Scroll to paste.
+	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 	return false;
 }
 
@@ -322,7 +325,7 @@ function formatPaste(respd, small) {
 	respd.longUrl = pasteSite + "/m/" + respd.id;
 	respd.flag = (small) ? "small" : "view";
 
-	//Determine highlighting type for content.
+	//Determine highlighting class based on the content type, which doesn't always match.
 	if (respd.annotation.content) {
 		if (respd.annotation.content_type) {
 			switch (respd.annotation.content_type) {
@@ -332,6 +335,11 @@ function formatPaste(respd, small) {
 				case "html":
 					respd.highlightClass =  "xml";
 					break;
+				case "scheme":
+					respd.highlightClass =  "lisp";
+					break;
+				case "c":
+				case "prolog":
 				case "code":
 					//autodetect
 					break;
