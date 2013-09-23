@@ -21,18 +21,18 @@ var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['cli
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
 		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
 		+ "{{^is_deleted}}"
-			+ "<h5>{{annotation.title}}</h5>"
+			+ "<h5>{{#annotation.title}}<span class='pasteTitle'>{{annotation.title}}</span>{{/annotation.title}}</h5>"
 			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>" 
 			+ "{{#small}}"
-				+ "<pre>{{annotation.content}}</pre>{{#annotation}}<span class='tags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}"
+				+ "<pre>{{annotation.content}}</pre>{{#annotation}}<span class='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}"
 				+ "<button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View</button>"
 			+ "{{/small}}"
 			+ "{{^small}}"
 				+ "<pre><code class='{{highlightClass}}'>{{annotation.content}}</code></pre>"
-				+ "<p><strong>Tags:</strong> {{#annotation}}{{#tags}}{{.}} {{/tags}}{{/annotation}}<br />"
+				+ "<p><strong>Tags:</strong> {{#annotation}}<span class='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />"
 				+ "<strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
 				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
-				+ "<div><strong>Raw:</strong> <textarea id='repaste-text' rows='6' style='width:99%;'>{{annotation.content}}</textarea>"
+				+ "<div><strong>Raw{{#annotation.content_type}} (<span class='pasteContentType'>{{annotation.content_type}}</span>){{/annotation.content_type}}:</strong> <textarea id='rawPaste' rows='6' style='width:99%;' readonly='readonly'>{{annotation.content}}</textarea>"
 				+ "{{#auth}}"
 					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
 					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
@@ -116,7 +116,7 @@ function completeSingle(response) {
 	if (!respd.created_at)
 		respd = response.data[0];
 	$('#yourPaste').html("<h3>Paste " + respd.id + "</h3>" + formatPaste(respd)).promise().done(function(){
-		$('textarea#repaste-text').css("height", $("code").css("height"));
+		$('textarea#rawPaste').css("height", $("code").css("height"));
 	});
 	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
 	if ($('#yourPaste h5').html() != "") {
@@ -258,6 +258,7 @@ function completeDelete(response) {
 
 function clearForm() {
 	event.preventDefault();
+	$("#newPaste h3").html("New Paste");
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
@@ -287,16 +288,15 @@ function clickPaste(event) {
 }
 
 function clickRepaste() {
-	//Needs rewrite to populate paste form.
-	/*
-	if ($('#repaste-text').val() !== '') {
-		if (pasteChannel)
-			createPaste($('#repaste-text').val());
-		else
-			createPasteChannel($('#repaste-text').val());
-	}
-	return false;
-	*/
+	//Now uses the paste form instead of automatically pasting.
+	clearForm();
+	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
+	$('form#paste-create input#paste-tags').val($('#yourPaste .pasteTags').html());
+	$('form#paste-create textarea').val($("#rawPaste").val());
+	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
+	//Scroll to paste.
+	window.location.href = window.location.href.split("#")[0] + "#newPaste";
+	$("#newPaste h3").html("Repaste");
 }
 
 function failAlert(msg) {
