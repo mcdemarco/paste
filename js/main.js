@@ -36,8 +36,9 @@ var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>"
 				+ "{{#auth}}"
 					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
 					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
+					+ "<button onclick='clickClose()'>Close Paste</button>"
 				+ "{{/auth}}"
-				+ "<button onclick='clickClose()'>Close Paste</button></div>"
+				+ "</div>"
 			+ "{{/small}}"
 		+ "{{/is_deleted}}<hr/></div>";
 
