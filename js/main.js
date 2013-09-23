@@ -11,7 +11,7 @@ var pasteChannel = null;
 var annotationArgs = {include_annotations: 1};
 
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
-var highlightMin = 75; //Minimum paste length to trigger highlighting. (It's bad at language detection for short lengths.)
+var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
@@ -331,6 +331,9 @@ function formatPaste(respd, small) {
 					break;
 				case "html":
 					respd.highlightClass =  "xml";
+					break;
+				case "code":
+					//autodetect
 					break;
 				default:
 					respd.highlightClass = respd.annotation.content_type;
