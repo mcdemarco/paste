@@ -327,7 +327,7 @@ function formatPaste(respd, small) {
 	respd.flag = (small) ? "small" : "view";
 
 	//Determine highlighting class based on the content type, which doesn't always match.
-	if (respd.annotation.content) {
+	if (respd.annotation && respd.annotation.content) {
 		if (respd.annotation.content_type) {
 			switch (respd.annotation.content_type) {
 				case "text":
