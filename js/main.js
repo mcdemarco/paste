@@ -2,11 +2,6 @@
 //Based on original paste-app code for app.net from @duerig.
 //This version by @mcdemarco.
 
-var api = {
-	client_id: '<APP_ID>'
-};
-var pasteSite = "http://paste-app.net";
-
 var pasteChannel = null;
 var annotationArgs = {include_annotations: 1};
 
