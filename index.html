@@ -186,7 +186,7 @@
 			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6" style="width:99%;margin-bottom:3px;"></textarea>
 
 			    <input placeholder="Paste Tags (Optional)" id="paste-tags" name="tags" style="width:75%;vertical-align:top;"/>
-			    <button>Save</button> <button onclick="clearForm();">Clear</button>
+			    <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button>
 			  </form>
 			 </div>
 			</div>

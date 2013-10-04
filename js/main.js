@@ -251,7 +251,6 @@ function completeDelete(response) {
 /* miscellaneous functions */
 
 function clearForm() {
-	event.preventDefault();
 	$("#newPaste h3").html("New Paste");
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
