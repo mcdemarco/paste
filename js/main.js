@@ -88,7 +88,6 @@ function getUrlVars(url) {
 
 function getSingle() {
 	if (getvars['m']) {
-		failAlert("");
 		if (!getvars['c']) {
 			if (api.accessToken) {
 				var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
@@ -199,7 +198,6 @@ function morePastes() {
 /* channel/paste creation/deletion functions */
 
 function createPaste(formObject) {
-	failAlert("");
 	var message = {
 		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
 		annotations: [{
@@ -296,7 +294,7 @@ function clickRepaste() {
 }
 
 function failAlert(msg) {
-	$('#paste-error').html(msg);
+	$('#paste-error').html(msg).show().fadeOut(8000);
 }
 
 function formatPaste(respd, small) {
