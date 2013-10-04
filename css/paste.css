@@ -28,6 +28,7 @@ pre, textarea {
 }
 
 div.view pre code.undefined,
+div.view pre code.markdown,
 div.view pre code.no-highlight {
     white-space: pre-wrap;
 }
