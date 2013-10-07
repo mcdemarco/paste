@@ -2,11 +2,6 @@
 //Based on original paste-app code for app.net from @duerig.
 //This version by @mcdemarco.
 
-var api = {
-	client_id: '<APP_ID>'
-};
-var pasteSite = "http://paste-app.net";
-
 var pasteChannel = null;
 var annotationArgs = {include_annotations: 1};
 
@@ -93,7 +88,6 @@ function getUrlVars(url) {
 
 function getSingle() {
 	if (getvars['m']) {
-		failAlert("");
 		if (!getvars['c']) {
 			if (api.accessToken) {
 				var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
@@ -204,7 +198,6 @@ function morePastes() {
 /* channel/paste creation/deletion functions */
 
 function createPaste(formObject) {
-	failAlert("");
 	var message = {
 		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
 		annotations: [{
@@ -258,7 +251,6 @@ function completeDelete(response) {
 /* miscellaneous functions */
 
 function clearForm() {
-	event.preventDefault();
 	$("#newPaste h3").html("New Paste");
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
@@ -301,7 +293,7 @@ function clickRepaste() {
 }
 
 function failAlert(msg) {
-	$('#paste-error').html(msg);
+	$('#paste-error').html(msg).show().fadeOut(8000);
 }
 
 function formatPaste(respd, small) {

@@ -3,3 +3,5 @@ RewriteRule   ^m/(.*)/  index.html [L]
 RewriteRule   ^m/(.*)   index.html
 
 ErrorDocument 404 /404.html
+
+AddType text/cache-manifest .manifest
