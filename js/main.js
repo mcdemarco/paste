@@ -54,6 +54,13 @@ function initialize() {
 		$(".loggedOut").show('slow');
 	}
 	$("a.adn-button").attr('href',authUrl);
+	$('#paste-description').keyup(function () {
+		var max = 2048;
+		var len = $(this).val().length;
+		var cnt = max - len;
+		var col = (cnt > 20) ? "gray" : "red";
+		$('#pasteCounter').text(cnt).css("color",col);
+	});
 }
 
 function getUrlVars(url) {
@@ -113,7 +120,7 @@ function completeSingle(response) {
 	$('#yourPaste').html("<h3>Paste " + respd.id + "</h3>" + formatPaste(respd)).promise().done(function(){
 		$('textarea#rawPaste').css("height", $("code").css("height"));
 	});
-	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
+	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	');});
 	if ($('#yourPaste h5').html() != "") {
 		$('#yourPaste h3').html($('#yourPaste h5').html());
 		$('#yourPaste h5').hide();
@@ -255,6 +262,7 @@ function clearForm() {
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
+	$('#pasteCounter').html("");	
 }
 
 function clickClose(event) {
@@ -399,6 +407,20 @@ function logout() {
 function pushHistory(newLocation) {
 	if (history.pushState) 
 		history.pushState({}, document.title, newLocation);
+}
+
+function testForm() {
+	var myText = $("#paste-description").val(); 
+	var message = {
+		text: myText
+	};
+	var promise = $.appnet.text.process(message);
+	promise.then(completeTest, function (response) {failAlert('Failed test.');});
+}
+
+function completeTest(response) {
+	$("#yourPaste").prepend(response.data.html + "<hr />");
+	clearForm();
 }
 
 function toggleAbout() {

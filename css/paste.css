@@ -103,6 +103,27 @@ button#logOutButton {
     margin-bottom: -3px;
 }
 
+textarea#paste-text,
+textarea#paste-description {
+    margin-bottom:3px;
+}
+
+textarea#paste-text {
+    width:99%;
+}
+
+textarea#paste-description {
+    width:99%;
+    min-height:2em;
+}
+
+textarea#paste-description,
+span#pasteCounter {
+    display:inline-block;
+    vertical-align:top;
+}
+
+
 /* override some button stuff from base.css */
 
 	.button,

@@ -183,10 +183,10 @@
 			      <option disabled>---</option>
 			      <option value="code">other</option>
 			    </select>
-			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6" style="width:99%;margin-bottom:3px;"></textarea>
-
+			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6"></textarea>
+			    <div style="white-space:nowrap;"><textarea placeholder="Paste Description (Optional)" id="paste-description" name="description" rows="2"></textarea>&nbsp;<span id="pasteCounter"></span></div>
 			    <input placeholder="Paste Tags (Optional)" id="paste-tags" name="tags" style="width:75%;vertical-align:top;"/>
-			    <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button>
+			    <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button> <button onclick="event.preventDefault();testForm();">Test</button>
 			  </form>
 			 </div>
 			</div>
