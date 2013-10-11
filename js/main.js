@@ -317,7 +317,8 @@ function formatPaste(respd, small) {
 		}
 	}
 	//Add more info for use by the template.
-	respd.created_at = (new Date(respd.created_at)).toString();
+	var pasteDate = new Date(respd.created_at);
+	respd.created_at = (small) ? pasteDate.toLocaleDateString() : pasteDate.toLocaleString();
 	respd.shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
 	respd.small = (small) ? true : false;
 	respd.auth = (api.accessToken) ? true : false;
