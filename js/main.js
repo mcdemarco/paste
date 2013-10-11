@@ -365,7 +365,7 @@ function getFormAsObject($form){
 	$.map(unindexed_array, function(n, i){
 		if (n['value'] !== "") {
 			if (n['name'] == "tags") {
-				indexed_array[n['name']] = n['value'].split(/[ ,]+/);
+				indexed_array[n['name']] = $.trim(n['value']).split(/[ ,]+/);
 			} else {
 				indexed_array[n['name']] = n['value'];
 			}
