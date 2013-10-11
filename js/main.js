@@ -211,7 +211,7 @@ function morePastes() {
 
 function createPaste(formObject) {
 	var message = {
-		text: defaultText,
+		text: $("#paste-description").val(),
 		annotations: [{
 						  type: 'net.paste-app.clip',
 						  value: formObject
@@ -268,6 +268,7 @@ function clearForm() {
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
 	$('#pasteCounter').html("");	
+	$('#paste-description').html(defaultText);	
 }
 
 function clickClose(event) {
@@ -298,7 +299,8 @@ function clickRepaste() {
 	clearForm();
 	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
 	$('form#paste-create input#paste-tags').val($('#yourPaste .pasteTags').html());
-	$('form#paste-create textarea').val($("#rawPaste").val());
+	$('form#paste-create textarea#paste-text').val($("#rawPaste").val());
+	$('form#paste-create textarea#paste-description').val(defaultText);
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
 	//Scroll to paste.
 	window.location.href = window.location.href.split("#")[0] + "#newPaste";
@@ -372,7 +374,7 @@ function getFormAsObject($form){
 		if (n['value'] !== "") {
 			if (n['name'] == "tags") {
 				indexed_array[n['name']] = $.trim(n['value']).split(/[ ,]+/);
-			} else {
+			} else if (n['name'] != "description") {
 				indexed_array[n['name']] = n['value'];
 			}
 		}
@@ -413,15 +415,6 @@ function logout() {
 function pushHistory(newLocation) {
 	if (history.pushState) 
 		history.pushState({}, document.title, newLocation);
-}
-
-function testForm() {
-	var myText = $("#paste-description").val(); 
-	var message = {
-		text: myText
-	};
-	var promise = $.appnet.text.process(message);
-	promise.then(completeTest, function (response) {failAlert('Failed test.');});
 }
 
 function completeTest(response) {
