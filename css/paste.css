@@ -47,6 +47,10 @@ div.view pre code {
     vertical-align: top;
 }
 
+span.tags {
+    padding-left: 10%;
+}
+
 div.small .byline a {
     text-decoration: none;
 }
@@ -123,6 +127,16 @@ span#pasteCounter {
     vertical-align:top;
 }
 
+div.description {
+    display:inline-block;
+    width:80%;
+}
+
+div.smallButtons {
+    display:inline-block;
+    text-align:right;
+    width:20%;
+}
 
 /* override some button stuff from base.css */
 
