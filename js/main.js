@@ -8,6 +8,7 @@ var annotationArgs = {include_annotations: 1};
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
+var defaultText = 'Paste Link is ' + pasteSite + '/m/{message_id}';
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
 var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
@@ -206,7 +207,7 @@ function morePastes() {
 
 function createPaste(formObject) {
 	var message = {
-		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
+		text: defaultText,
 		annotations: [{
 						  type: 'net.paste-app.clip',
 						  value: formObject
