@@ -281,16 +281,21 @@ function clickClose(event) {
 
 function clickPaste(event) {
 	event.preventDefault();
-	if ($('#paste-text').val() !== '') {
-		var formObject = getFormAsObject($('form#paste-create'));
-		if (pasteChannel) {
-			createPaste(formObject);
-		} else {
-			createPasteChannel(formObject);
+	if ($('#paste-description').val().length < 2048) {
+		if ($('#paste-text').val() !== '') {
+			var formObject = getFormAsObject($('form#paste-create'));
+			if (pasteChannel) {
+				createPaste(formObject);
+			} else {
+				createPasteChannel(formObject);
+			}
 		}
+		//Scroll to paste.
+		window.location.href = window.location.href.split("#")[0] + "#yourPaste";
+	} else {
+		$('#yourPaste').html("");
+		failAlert("Description too long.");
 	}
-	//Scroll to paste.
-	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 	return false;
 }
 
@@ -308,7 +313,8 @@ function clickRepaste() {
 }
 
 function failAlert(msg) {
-	$('#paste-error').html(msg).show().fadeOut(8000);
+	window.location.href = window.location.href.split("#")[0] + "#pasteError";
+	$('#pasteError').html(msg).show().fadeOut(8000);
 }
 
 function formatPaste(respd, small) {

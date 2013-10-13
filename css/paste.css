@@ -15,10 +15,11 @@ hr {
     display:none;
 }
 
-div#paste-error {
+div#pasteError {
     text-align:center;
     font-weight:bold;
     color: #823332;
+    padding-top:5px;
 }
 
 pre, textarea {
