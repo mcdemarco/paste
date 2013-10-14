@@ -130,7 +130,7 @@
 			  <form id="paste-create">
 			    <input placeholder="Paste Title (Optional)" id="paste-title" name="title" style="width:75%;" />&nbsp; 
 			    <select id="paste-content_type" name="content_type" style="margin-bottom:3px;display:inline-block;">
-			      <option value="" disabled selected>Paste type (optional)</option>
+			      <option value="" selected>Paste type (optional)</option>
 			      <option value="text">Plain text</option>
 			      <option value="markdown">Markdown</option>
 			      <option disabled>---</option>
@@ -183,8 +183,8 @@
 			      <option disabled>---</option>
 			      <option value="code">other</option>
 			    </select>
-			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6"></textarea>
-			    <div style="white-space:nowrap;"><textarea placeholder="Paste Description (Optional)" id="paste-description" name="description" rows="2"></textarea>&nbsp;<span id="pasteCounter"></span></div>
+			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="7"></textarea>
+			    <div style="white-space:nowrap;"><textarea placeholder="Paste Description (Optional)" id="paste-description" name="description" rows="4"></textarea>&nbsp;<span id="pasteCounter"></span></div>
 			    <input placeholder="Paste Tags (Optional)" id="paste-tags" name="tags" style="width:75%;vertical-align:top;"/>
 			    <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button>
 			  </form>

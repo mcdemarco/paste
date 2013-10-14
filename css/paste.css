@@ -38,6 +38,12 @@ div.view pre code {
     overflow-y:auto;
 }
 
+div.view div.description {
+    width:99%;
+    padding:2px 4px;
+    border:1px solid gray;
+}
+
 .byline {
     font-style: italic;
     padding-top: 2px;
