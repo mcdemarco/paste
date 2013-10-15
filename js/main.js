@@ -64,12 +64,13 @@ function initialize() {
 		$(".loggedOut").show('slow');
 	}
 	$("a.adn-button").attr('href',authUrl);
+	$('#paste-description').val(defaultDescription);
 	$('#paste-description').keyup(function () {
 		var max = 2048;
 		var len = $(this).val().length;
 		var cnt = max - len;
 		var col = (cnt > 20) ? "gray" : "red";
-		$('#pasteCounter').text(cnt).css("color",col);
+		$('#pasteCounter').html("&nbsp;"+cnt).css("color",col);
 	});
 }
 
@@ -274,7 +275,7 @@ function clearForm() {
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
 	$('#pasteCounter').html("");
-	$('#paste-description').html(defaultDescription);	
+	$('#paste-description').val(defaultDescription);	
 }
 
 function clickClose(event) {
@@ -287,21 +288,26 @@ function clickClose(event) {
 
 function clickPaste(event) {
 	event.preventDefault();
-	if ($('#paste-description').val().length > 2048) {
-		$('#yourPaste').html("");
+	$('#yourPaste').html("");
+	var message = $("#paste-description").val();
+	if (message.length > 2048) {
 		failAlert("Description too long.");
+	} else if ($.trim(message).length == 0) {
+		failAlert("Description required.<br /> (The default description has been restored.  Edit it or click save again.)");
+		$('form#paste-create textarea#paste-description').val(defaultDescription);
 	} else {
 		var formObject = getFormAsObject($('form#paste-create'));
-		var message = $("#paste-description").val();
-		if ($.trim(message).length == 0) 
-			message = defaultMessage;
-		if (pasteChannel) {
-			createPaste(formObject,message);
+		if ($.trim(message) == defaultDescription && $.isEmptyObject(formObject)) {
+			failAlert("You didn't paste anything.");
 		} else {
-			createPasteChannel(formObject,message);
+			if (pasteChannel) {
+				createPaste(formObject,message);
+			} else {
+				createPasteChannel(formObject,message);
+			}
+			//Scroll to paste.
+			window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 		}
-		//Scroll to paste.
-		window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 	}
 	return false;
 }

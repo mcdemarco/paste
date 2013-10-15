@@ -134,6 +134,10 @@ span#pasteCounter {
     vertical-align:top;
 }
 
+span#pasteCounter {
+    width:4em;
+}
+
 div.description {
     display:inline-block;
     width:80%;
@@ -144,6 +148,32 @@ div.smallButtons {
     text-align:right;
     width:20%;
 }
+
+div.formDescription {
+    display:inline-block;
+    vertical-align:bottom;
+    width:75%;
+    margin:0;
+    padding:0;
+}
+
+div.formCounter {
+    display:inline-block;
+    vertical-align:top;
+    margin:0;
+    padding-top:4px;
+/*    padding-left:5px; */
+    width:5%;
+}
+
+div.formButtons {
+    display:inline-block;
+    vertical-align:bottom;
+    text-align:center;
+    width:19%;
+    white-space:nowrap;
+}
+
 
 /* override some button stuff from base.css */
 
