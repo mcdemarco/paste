@@ -316,7 +316,6 @@ function clickRepaste() {
 	//Now uses the paste form instead of automatically pasting.
 	clearForm();
 	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
-	$('form#paste-create input#paste-tags').val($('#yourPaste .pasteTags').html());
 	$('form#paste-create textarea#paste-text').val($("#rawPaste").val());
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
 	$('form#paste-create textarea#paste-description').val($("#repasteDescription").val().replace("Paste Link is",defaultDescription + " repasted from"));
@@ -390,12 +389,8 @@ function getFormAsObject($form){
 	//Convert name/value to JSON style.
 	//Don't pass empty string values to ADN in order to save annotation space.
 	$.map(unindexed_array, function(n, i){
-		if (n['value'] !== "") {
-			if (n['name'] == "tags") {
-				indexed_array[n['name']] = $.trim(n['value']).split(/[ ,]+/);
-			} else if (n['name'] != "description") {
-				indexed_array[n['name']] = n['value'];
-			}
+		if ((n['value'] !== "") && (n['name'] != "description")) {
+			indexed_array[n['name']] = n['value'];
 		}
 	});
 	return indexed_array;
