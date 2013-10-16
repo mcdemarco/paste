@@ -215,14 +215,17 @@ function morePastes() {
 /* channel/paste creation/deletion functions */
 
 function createPaste(formObject,message) {
-	var message = {
+	var newMessage = {
 		text: message,
 		annotations: [{
 						  type: 'net.paste-app.clip',
 						  value: formObject
 					  }]
 	};
-	var promise = $.appnet.message.create(pasteChannel.id, message, annotationArgs);
+	if (JSON.stringify(newMessage.annotations).length > 8192) {
+		failAlert("Paste too long.");
+	}
+	var promise = $.appnet.message.create(pasteChannel.id, newMessage, annotationArgs);
 	promise.then(completePaste, function (response) {failAlert('Failed to create paste.');});
 }
 
