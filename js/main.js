@@ -297,6 +297,7 @@ function clickPaste(event) {
 	} else if ($.trim(message).length == 0) {
 		failAlert("Description required.<br /> (The default description has been restored.  Edit it or click save again.)");
 		$('form#paste-create textarea#paste-description').val(defaultDescription);
+		$('#pasteCounter').html("");
 	} else {
 		var formObject = getFormAsObject($('form#paste-create'));
 		if ($.trim(message) == defaultDescription && $.isEmptyObject(formObject)) {
