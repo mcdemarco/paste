@@ -19,19 +19,18 @@ var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>"
 		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
 		+ "{{^is_deleted}}"
 			+ "<h5>{{#annotation.title}}<span class='pasteTitle'>{{annotation.title}}</span>{{/annotation.title}}</h5>"
-			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a>"
+			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>"
 			+ "{{#small}}"
-				+ "{{#annotation}} <span class='tags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}</div>"
 				+ "{{#annotation.content}}<pre>{{annotation.content}}</pre>{{/annotation.content}}"
 				+ "<div class='description'>{{{html}}}</div>"
 				+ "<div class='smallButtons'><button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View</button></div>"
 			+ "{{/small}}"
 			+ "{{^small}}"
-				+ "</div>"
 				+ "{{#annotation.content}}<pre><code class='{{highlightClass}}'>{{annotation.content}}</code></pre>{{/annotation.content}}"
 				+ "<input id='repasteDescription' type='hidden' value='{{text}}'/>"
 				+ "<div class='description'><strong>Description:</strong><br/> {{{html}}}</div>"
-				+ "<p><strong>Tags:</strong> {{#annotation}}<span class='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />"
+				+ "<p>"
+				+ "{{#oldTags}}<strong>Tags:</strong> {{#annotation}}<span id='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />{{/oldTags}}"
 				+ "<strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
 				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
 				+ "<div>"
@@ -315,10 +314,15 @@ function clickPaste(event) {
 function clickRepaste() {
 	//Now uses the paste form instead of automatically pasting.
 	clearForm();
+	var repasteDescription = $("#repasteDescription").val().replace("Paste Link is",defaultDescription + " repasted from");
+	//Handle old tags by conversion to hashtags. Deprecate me!
+	if ($('#pasteTags').length > 0) {
+		repasteDescription += "\n#" + $.trim($('#pasteTags').html()).split(" ").join(" #");
+	}
 	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
 	$('form#paste-create textarea#paste-text').val($("#rawPaste").val());
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
-	$('form#paste-create textarea#paste-description').val($("#repasteDescription").val().replace("Paste Link is",defaultDescription + " repasted from"));
+	$('form#paste-create textarea#paste-description').val(repasteDescription);
 	//Scroll to paste.
 	window.location.href = window.location.href.split("#")[0] + "#newPaste";
 	$("#newPaste h3").html("Repaste");
@@ -339,6 +343,7 @@ function formatPaste(respd, small) {
 	for (; i < annotations.length; ++i) {
 		if (annotations[i].type === 'net.paste-app.clip') {
 			respd.annotation = annotations[i].value;
+			respd.oldTags = (respd.annotation.tags && respd.annotation.tags != []) ? true : false;
 		}
 	}
 	//Add more info for use by the template.
