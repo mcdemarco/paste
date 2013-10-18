@@ -223,7 +223,10 @@ function createPaste(formObject,message) {
 					  }]
 	};
 	if (JSON.stringify(newMessage.annotations).length > 8192) {
+		//In this case we know the paste is too long, but passing this check is no guarantee. 
+		//Need to implement a real byte-counter here for deciding to paste to a file.
 		failAlert("Paste too long.");
+		return;
 	}
 	var promise = $.appnet.message.create(pasteChannel.id, newMessage, annotationArgs);
 	promise.then(completePaste, function (response) {failAlert('Failed to create paste.');});
