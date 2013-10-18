@@ -180,7 +180,7 @@ function completeMultiple(response) {
 		api.lastId = respd.id;
 		api.more = response.meta.more;
 		if (!api.more) {
-			$('div#morePastes button').prop('disabled',true);
+			$('button#morePastes').prop('disabled',true);
 		}
 	} else {
 		$(col).html("<em>No pastes found.</em>");
@@ -213,6 +213,22 @@ function morePastes() {
 }
 
 /* channel/paste creation/deletion functions */
+
+function archiveChannel() {
+	//This function leaves the pastes readable, but hides the channel from the app.
+	var channel = {
+		type: 'net.paste-app.archive',
+		auto_subscribe: false,
+		readers: { 'public': true }
+	};
+	var promise = $appnet.channel.update(pasteChannel,channel);
+	promise.then(completeArchiveChannel, function (response) {failAlert('Failed to archive channel.');});
+}
+
+function completeArchiveChannel(response) {
+	//debugger;
+	failAlert('Channel archived.',true);
+}
 
 function createPaste(formObject,message) {
 	var newMessage = {
@@ -335,8 +351,10 @@ function clickRepaste() {
 	$("#newPaste h3").html("Repaste");
 }
 
-function failAlert(msg) {
+function failAlert(msg,success) {
 	window.location.href = window.location.href.split("#")[0] + "#pasteError";
+	if (success)
+		msg = "<span class='green'>"+msg+"</span>";
 	$('#pasteError').html(msg).show().fadeOut(8000);
 }
 

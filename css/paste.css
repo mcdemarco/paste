@@ -11,6 +11,10 @@ hr {
     height: 2px;
 }
 
+.green {
+    color: #7E8250;
+}
+
 .about {
     display:none;
 }
