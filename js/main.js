@@ -141,7 +141,8 @@ function getChannel() {
 	//We have the token.
 	var args = {
 		count: 1,
-		channel_types: 'net.paste-app.clips'
+		channel_types: 'net.paste-app.clips',
+		include_annotations: 1
 	};
 	var promise = $.appnet.channel.getCreated(args);
 	promise.then(completeChannel, function (response) {failAlert('Failed to retrieve paste channel.');}).then(getSingle);
@@ -149,7 +150,15 @@ function getChannel() {
 
 function completeChannel(response) {
 	if (response.data.length > 0) {
-		pasteChannel = response.data[0];
+		for (var i = 0; i < response.data.length; i++) {
+			if (!response.data[i].annotations) {
+				//There are no settings on the default channel.
+				pasteChannel = response.data[i];
+				break;
+			}
+		}
+	}
+	if (pasteChannel) {
 		var args = {
 			count: multipleCount,
 			include_annotations: 1,
@@ -217,17 +226,19 @@ function morePastes() {
 function archiveChannel() {
 	//This function leaves the pastes readable, but hides the channel from the app.
 	var channel = {
-		type: 'net.paste-app.archive',
-		auto_subscribe: false,
+		annotations: [{
+						  type: 'net.paste-app.settings',
+						  value: { 'archived': true }
+					  }],
 		readers: { 'public': true }
 	};
-	var promise = $appnet.channel.update(pasteChannel,channel);
+	var promise = $.appnet.channel.update(pasteChannel.id,channel);
 	promise.then(completeArchiveChannel, function (response) {failAlert('Failed to archive channel.');});
 }
 
 function completeArchiveChannel(response) {
-	//debugger;
-	failAlert('Channel archived.',true);
+	if (response.meta.code == 200)
+		failAlert('Channel ' + response.data.id +  ' archived.',true);
 }
 
 function createPaste(formObject,message) {
