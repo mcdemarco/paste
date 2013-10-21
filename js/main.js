@@ -151,8 +151,9 @@ function getChannel() {
 function completeChannel(response) {
 	if (response.data.length > 0) {
 		for (var i = 0; i < response.data.length; i++) {
-			if (!response.data[i].annotations) {
-				//There are no settings on the default channel.
+			if (response.data[i].annotations.length == 0) {
+				//Ideally check that an existing annotation is actually net.paste-app.settings,
+				//instead of just assuming (there are no settings on the default channel).
 				pasteChannel = response.data[i];
 				break;
 			}
