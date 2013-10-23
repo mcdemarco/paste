@@ -8,6 +8,8 @@ var annotationArgs = {include_annotations: 1};
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
+var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{message_id}';
+var currentDescription = "";
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
 var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
@@ -17,17 +19,24 @@ var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>"
 		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
 		+ "{{^is_deleted}}"
 			+ "<h5>{{#annotation.title}}<span class='pasteTitle'>{{annotation.title}}</span>{{/annotation.title}}</h5>"
-			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>" 
+			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>"
 			+ "{{#small}}"
-				+ "<pre>{{annotation.content}}</pre>{{#annotation}}<span class='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}"
-				+ "<button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View</button>"
+				+ "{{#annotation.content}}<pre>{{annotation.content}}</pre>{{/annotation.content}}"
+				+ "<div class='description'>{{{html}}}</div>"
+				+ "<div class='smallButtons'><button class='enlargeButton' id='{{shorty}}' onclick='viewPaste(this.id)'>View</button></div>"
 			+ "{{/small}}"
 			+ "{{^small}}"
-				+ "<pre><code class='{{highlightClass}}'>{{annotation.content}}</code></pre>"
-				+ "<p><strong>Tags:</strong> {{#annotation}}<span class='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />"
+				+ "{{#annotation.content}}<pre><code class='{{highlightClass}}'>{{annotation.content}}</code></pre>{{/annotation.content}}"
+				+ "<input id='repasteDescription' type='hidden' value='{{text}}'/>"
+				+ "<div class='description'><strong>Description:</strong><br/> {{{html}}}</div>"
+				+ "<p>"
+				+ "{{#oldTags}}<strong>Tags:</strong> {{#annotation}}<span id='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />{{/oldTags}}"
 				+ "<strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
 				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
-				+ "<div><strong>Raw{{#annotation.content_type}} (<span class='pasteContentType'>{{annotation.content_type}}</span>){{/annotation.content_type}}:</strong> <textarea id='rawPaste' rows='6' style='width:99%;' readonly='readonly'>{{annotation.content}}</textarea>"
+				+ "<div>"
+				+ "{{#annotation.content}}"
+					+ "<strong>Raw{{#annotation.content_type}} (<span class='pasteContentType'>{{annotation.content_type}}</span>){{/annotation.content_type}}:</strong> <textarea id='rawPaste' rows='6' style='width:99%;' readonly='readonly'>{{annotation.content}}</textarea>"
+				+ "{{/annotation.content}}"
 				+ "{{#auth}}"
 					+ "<button class='loggedIn' onclick='clickRepaste()'>Repaste</button>"
 					+ "{{#del}}<button class='loggedIn' onclick='deletePaste({{id}})'>Delete Paste</button>{{/del}}"
@@ -54,6 +63,14 @@ function initialize() {
 		$(".loggedOut").show('slow');
 	}
 	$("a.adn-button").attr('href',authUrl);
+	$('#paste-description').val(defaultDescription);
+	$('#paste-description').keyup(function () {
+		var max = 2048;
+		var len = $(this).val().length;
+		var cnt = max - len;
+		var col = (cnt > 20) ? "gray" : "red";
+		$('#pasteCounter').html("&nbsp;"+cnt).css("color",col);
+	});
 }
 
 function getUrlVars(url) {
@@ -113,7 +130,7 @@ function completeSingle(response) {
 	$('#yourPaste').html("<h3>Paste " + respd.id + "</h3>" + formatPaste(respd)).promise().done(function(){
 		$('textarea#rawPaste').css("height", $("code").css("height"));
 	});
-	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	')});
+	$('pre code').each(function(i, e) {hljs.highlightBlock(e, '	');});
 	if ($('#yourPaste h5').html() != "") {
 		$('#yourPaste h3').html($('#yourPaste h5').html());
 		$('#yourPaste h5').hide();
@@ -197,15 +214,21 @@ function morePastes() {
 
 /* channel/paste creation/deletion functions */
 
-function createPaste(formObject) {
-	var message = {
-		text: 'Paste Link is ' + pasteSite + '/m/{message_id}',
+function createPaste(formObject,message) {
+	var newMessage = {
+		text: message,
 		annotations: [{
 						  type: 'net.paste-app.clip',
 						  value: formObject
 					  }]
 	};
-	var promise = $.appnet.message.create(pasteChannel.id, message, annotationArgs);
+	if (JSON.stringify(newMessage.annotations).length > 8192) {
+		//In this case we know the paste is too long, but passing this check is no guarantee. 
+		//Need to implement a real byte-counter here for deciding to paste to a file.
+		failAlert("Paste too long.");
+		return;
+	}
+	var promise = $.appnet.message.create(pasteChannel.id, newMessage, annotationArgs);
 	promise.then(completePaste, function (response) {failAlert('Failed to create paste.');});
 }
 
@@ -218,9 +241,10 @@ function completePaste(response) {
 	$("#col1").prepend(formatPaste(respd,true));
 }
 
-function createPasteChannel(formObject) {
+function createPasteChannel(formObject,message) {
 	var context = {
-		formObject: formObject
+		formObject: formObject,
+		message: message
 	};
 	var channel = {
 		type: 'net.paste-app.clips',
@@ -233,7 +257,7 @@ function createPasteChannel(formObject) {
 
 function completeCreateChannel(response) {
 	pasteChannel = response.data;
-	createPaste(this.text);
+	createPaste(this.formObject,this.message);
 }
 
 function deletePaste(messageId) {
@@ -255,6 +279,8 @@ function clearForm() {
 	$('form#paste-create input').each(function () {$(this).val("");});
 	$('form#paste-create textarea').val("");
 	$('form#paste-create select').val("");	
+	$('#pasteCounter').html("");
+	$('#paste-description').val(defaultDescription);	
 }
 
 function clickClose(event) {
@@ -267,33 +293,51 @@ function clickClose(event) {
 
 function clickPaste(event) {
 	event.preventDefault();
-	if ($('#paste-text').val() !== '') {
+	$('#yourPaste').html("");
+	var message = $("#paste-description").val();
+	if (message.length > 2048) {
+		failAlert("Description too long.");
+	} else if ($.trim(message).length == 0) {
+		failAlert("Description required.<br /> (The default description has been restored.  Edit it or click save again.)");
+		$('form#paste-create textarea#paste-description').val(defaultDescription);
+		$('#pasteCounter').html("");
+	} else {
 		var formObject = getFormAsObject($('form#paste-create'));
-		if (pasteChannel) {
-			createPaste(formObject);
+		if ($.trim(message) == defaultDescription && $.isEmptyObject(formObject)) {
+			failAlert("You didn't paste anything.");
 		} else {
-			createPasteChannel(formObject);
+			if (pasteChannel) {
+				createPaste(formObject,message);
+			} else {
+				createPasteChannel(formObject,message);
+			}
+			//Scroll to paste.
+			window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 		}
 	}
-	//Scroll to paste.
-	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
 	return false;
 }
 
 function clickRepaste() {
 	//Now uses the paste form instead of automatically pasting.
 	clearForm();
+	var repasteDescription = $("#repasteDescription").val().replace("Paste Link is",defaultDescription + " repasted from");
+	//Handle old tags by conversion to hashtags. Deprecate me!
+	if ($('#pasteTags').length > 0) {
+		repasteDescription += "\n#" + $.trim($('#pasteTags').html()).split(" ").join(" #");
+	}
 	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
-	$('form#paste-create input#paste-tags').val($('#yourPaste .pasteTags').html());
-	$('form#paste-create textarea').val($("#rawPaste").val());
+	$('form#paste-create textarea#paste-text').val($("#rawPaste").val());
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
+	$('form#paste-create textarea#paste-description').val(repasteDescription);
 	//Scroll to paste.
 	window.location.href = window.location.href.split("#")[0] + "#newPaste";
 	$("#newPaste h3").html("Repaste");
 }
 
 function failAlert(msg) {
-	$('#paste-error').html(msg).show().fadeOut(8000);
+	window.location.href = window.location.href.split("#")[0] + "#pasteError";
+	$('#pasteError').html(msg).show().fadeOut(8000);
 }
 
 function formatPaste(respd, small) {
@@ -306,10 +350,12 @@ function formatPaste(respd, small) {
 	for (; i < annotations.length; ++i) {
 		if (annotations[i].type === 'net.paste-app.clip') {
 			respd.annotation = annotations[i].value;
+			respd.oldTags = (respd.annotation.tags && respd.annotation.tags != []) ? true : false;
 		}
 	}
 	//Add more info for use by the template.
-	respd.created_at = (new Date(respd.created_at)).toString();
+	var pasteDate = new Date(respd.created_at);
+	respd.created_at = (small) ? pasteDate.toLocaleDateString() : pasteDate.toLocaleString();
 	respd.shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
 	respd.small = (small) ? true : false;
 	respd.auth = (api.accessToken) ? true : false;
@@ -355,12 +401,8 @@ function getFormAsObject($form){
 	//Convert name/value to JSON style.
 	//Don't pass empty string values to ADN in order to save annotation space.
 	$.map(unindexed_array, function(n, i){
-		if (n['value'] !== "") {
-			if (n['name'] == "tags") {
-				indexed_array[n['name']] = n['value'].split(/[ ,]+/);
-			} else {
-				indexed_array[n['name']] = n['value'];
-			}
+		if ((n['value'] !== "") && (n['name'] != "description")) {
+			indexed_array[n['name']] = n['value'];
 		}
 	});
 	return indexed_array;
@@ -399,6 +441,11 @@ function logout() {
 function pushHistory(newLocation) {
 	if (history.pushState) 
 		history.pushState({}, document.title, newLocation);
+}
+
+function completeTest(response) {
+	$("#yourPaste").prepend(response.data.html + "<hr />");
+	clearForm();
 }
 
 function toggleAbout() {

@@ -105,7 +105,11 @@
 
 			<p class="about">
 				Paste is a pasteboard/pinboard running on the social networking platform <a href="http://app.net/">app.net</a>.
-				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account. 
+				Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link for use by other app.net users and apps.  Logged-in users will also see a list of their recent pastes.  To create pastes, you will need a (free) app.net account. 
+			</p>
+
+			<p class="about">
+			  Pastes require a description; a default description is provided for you.  Pastes may also have titles, paste text, and a type for the paste text (used for display and highlighting of the paste text).  Paste tags have been replaced by hashtags in the description.
 			</p>
 
 			<p class="about">
@@ -118,7 +122,7 @@
 		</div>
 
 		<div id="overview" class="sixteen columns">
-			<div id="paste-error"></div>
+			<div id="pasteError"></div>
 			<div id="yourPaste"><p class="loggedOut" style="display:none;">To begin:</p></div>
 			<div id="loginRequest" class="loggedOut" style="display:none;">
 			  <a href='' class='adn-button' data-type='authorize_v2' data-width="145" data-height="22" >Authorize with App.net</a><script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='//d2zh9g63fcvyrq.cloudfront.net/adn.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'adn-button-js'));</script>
@@ -130,7 +134,7 @@
 			  <form id="paste-create">
 			    <input placeholder="Paste Title (Optional)" id="paste-title" name="title" style="width:75%;" />&nbsp; 
 			    <select id="paste-content_type" name="content_type" style="margin-bottom:3px;display:inline-block;">
-			      <option value="" disabled selected>Paste type (optional)</option>
+			      <option value="" selected>Paste type (optional)</option>
 			      <option value="text">Plain text</option>
 			      <option value="markdown">Markdown</option>
 			      <option disabled>---</option>
@@ -183,10 +187,16 @@
 			      <option disabled>---</option>
 			      <option value="code">other</option>
 			    </select>
-			    <textarea placeholder="Paste Text Here" id="paste-text" name="content" rows="6" style="width:99%;margin-bottom:3px;"></textarea>
-
-			    <input placeholder="Paste Tags (Optional)" id="paste-tags" name="tags" style="width:75%;vertical-align:top;"/>
-			    <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button>
+			    <textarea placeholder="Paste Text (Optional)" id="paste-text" name="content" rows="7"></textarea>
+			    <div class="formDescription">
+			      <textarea placeholder="Paste Description (Required)" title="Paste Description (Required)" id="paste-description" name="description" rows="4"></textarea>
+			    </div>
+			    <div class="formCounter">
+			      <span id="pasteCounter"></span>
+			    </div>
+			    <div class="formButtons">
+			      <button>Save</button> <button onclick="event.preventDefault();clearForm();">Clear</button>
+			    </div>
 			  </form>
 			 </div>
 			</div>

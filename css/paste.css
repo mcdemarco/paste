@@ -15,10 +15,11 @@ hr {
     display:none;
 }
 
-div#paste-error {
+div#pasteError {
     text-align:center;
     font-weight:bold;
     color: #823332;
+    padding-top:5px;
 }
 
 pre, textarea {
@@ -37,6 +38,12 @@ div.view pre code {
     overflow-y:auto;
 }
 
+div.view div.description {
+    width:99%;
+    padding:2px 4px;
+    border:1px solid gray;
+}
+
 .byline {
     font-style: italic;
     padding-top: 2px;
@@ -45,6 +52,10 @@ div.view pre code {
 .tags {
     font-style: italic;
     vertical-align: top;
+}
+
+span.tags {
+    padding-left: 10%;
 }
 
 div.small .byline a {
@@ -102,6 +113,67 @@ a#more {
 button#logOutButton {
     margin-bottom: -3px;
 }
+
+textarea#paste-text,
+textarea#paste-description {
+    margin-bottom:3px;
+}
+
+textarea#paste-text {
+    width:99%;
+}
+
+textarea#paste-description {
+    width:99%;
+    min-height:2em;
+}
+
+textarea#paste-description,
+span#pasteCounter {
+    display:inline-block;
+    vertical-align:top;
+}
+
+span#pasteCounter {
+    width:4em;
+}
+
+div.description {
+    display:inline-block;
+    width:80%;
+}
+
+div.smallButtons {
+    display:inline-block;
+    text-align:right;
+    width:20%;
+}
+
+div.formDescription {
+    display:inline-block;
+    vertical-align:bottom;
+    width:75%;
+    margin:0;
+    padding:0;
+}
+
+div.formCounter {
+    display:inline-block;
+    vertical-align:top;
+    margin:0;
+    padding-top:4px;
+/*    padding-left:5px; */
+    width:5%;
+}
+
+div.formButtons {
+    display:inline-block;
+    vertical-align:bottom;
+    text-align:center;
+    width:19%;
+    white-space:nowrap;
+}
+
 
 /* override some button stuff from base.css */
 
