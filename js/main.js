@@ -12,7 +12,7 @@ var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{message_id}';
 var currentDescription = "";
 
 //To force authorization: https://account.app.net/oauth/authorize etc.
-var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href + "&scope=public_messages";
+var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href.replace("!#","m") + "&scope=public_messages";
 
 //Mustache template for pastes.
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
@@ -51,6 +51,9 @@ var compiledTemplate = Mustache.compile(stringTemplate);
 /* main execution path */
 
 function initialize() {
+	//aws doesn't do rewrites, so manually rewrite the hash-bang back to the url
+	//http://stackoverflow.com/questions/16267339/s3-static-website-hosting-route-all-paths-to-index-html
+	pushHistory(window.location.href.replace("#!","m"));
 	//Parse the url.
 	getvars = getUrlVars();
 	if (api.accessToken) {//If we have the token, get the user's pastes, too.
@@ -78,7 +81,7 @@ function getUrlVars(url) {
 	var vars = [];
 	if (!url) {
 		//If no url passed in explicitly, we should check the current location for authentication info.
-		url = $.url();
+		url = $.url(window.location.href.replace("!#","m"));
 		if (url.fparam('access_token') && url.fparam('access_token').length > 0 ) {
 			api.accessToken = url.fparam('access_token');
 			//Hide & store the access token.
@@ -203,7 +206,7 @@ function morePastes() {
 		var promise = $.appnet.message.getChannel(pasteChannel.id, args);
 		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve pastes.');});
 		//Scroll to head of col2.
-		window.location.href = window.location.href.split("#")[0] + "#col2";
+		document.getElementById("col2").scrollIntoView();
 		//Flash some animation to indicate what's new.
 		$("#col2").animate({ opacity: 1.0 }, 1500 );
 		
@@ -312,7 +315,7 @@ function clickPaste(event) {
 				createPasteChannel(formObject,message);
 			}
 			//Scroll to paste.
-			window.location.href = window.location.href.split("#")[0] + "#yourPaste";
+			document.getElementById("yourPaste").scrollIntoView();
 		}
 	}
 	return false;
@@ -331,12 +334,12 @@ function clickRepaste() {
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
 	$('form#paste-create textarea#paste-description').val(repasteDescription);
 	//Scroll to paste.
-	window.location.href = window.location.href.split("#")[0] + "#newPaste";
+	document.getElementById("newPaste").scrollIntoView();
 	$("#newPaste h3").html("Repaste");
 }
 
 function failAlert(msg) {
-	window.location.href = window.location.href.split("#")[0] + "#pasteError";
+	document.getElementById("pasteError").scrollIntoView();
 	$('#pasteError').html(msg).show().fadeOut(8000);
 }
 
@@ -461,7 +464,7 @@ function viewPaste(shorty) {
 	getvars = getShortVars(shorty);
 	getSingle();
 	//Scroll to paste.
-	window.location.href = window.location.href.split("#")[0] + "#yourPaste";
+	document.getElementById("yourPaste").scrollIntoView();
 }
 
 /* eof */
