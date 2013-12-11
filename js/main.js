@@ -19,7 +19,7 @@ var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>"
 		+ "{{#is_deleted}}<em>This paste has been deleted by its owner.</em>{{/is_deleted}}"
 		+ "{{^is_deleted}}"
 			+ "<h5>{{#annotation.title}}<span class='pasteTitle'>{{annotation.title}}</span>{{/annotation.title}}</h5>"
-			+ "<div class='byline'>{{created_at}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>"
+			+ "<div class='byline'>{{pasteDate}} by <a href='{{user.canonical_url}}'>@{{user.username}}</a></div>"
 			+ "{{#small}}"
 				+ "{{#annotation.content}}<pre>{{annotation.content}}</pre>{{/annotation.content}}"
 				+ "<div class='description'>{{{html}}}</div>"
@@ -358,7 +358,7 @@ function formatPaste(respd, small) {
 	}
 	//Add more info for use by the template.
 	var pasteDate = new Date(respd.created_at);
-	respd.created_at = (small) ? pasteDate.toLocaleDateString() : pasteDate.toLocaleString();
+	respd.pasteDate = (small) ? pasteDate.toLocaleDateString() : pasteDate.toLocaleString();
 	respd.shorty = parseInt(respd.channel_id).toString(36) + "-" + parseInt(respd.id).toString(36);
 	respd.small = (small) ? true : false;
 	respd.auth = (api.accessToken) ? true : false;
