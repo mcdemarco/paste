@@ -1,6 +1,8 @@
 paste
 =====
 
+Paste away at http://paste-app.net.
+
 blurb
 -----
 
