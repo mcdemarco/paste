@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Paste by mcdemarco</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Paste</h1>
+        <p>Paste app for app.net.  </p>
+        <p class="view"><a href="https://github.com/mcdemarco/paste">View the Project on GitHub <small>mcdemarco/paste</small></a></p>
+        <ul>
+          <li><a href="https://github.com/mcdemarco/paste/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mcdemarco/paste/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mcdemarco/paste">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="paste" class="anchor" href="#paste" aria-hidden="true"><span class="octicon octicon-link"></span></a>paste</h1>
+
+<h2>
+<a id="blurb" class="anchor" href="#blurb" aria-hidden="true"><span class="octicon octicon-link"></span></a>blurb</h2>
+
+<p>Paste allows you to create and view short text clippings using app.net. Each paste has a public link that can be viewed without logging in to app.net, but an app.net account is required to create pastes.  Logged-in users also see a list of their own recent pastes.</p>
+
+<h2>
+<a id="about" class="anchor" href="#about" aria-hidden="true"><span class="octicon octicon-link"></span></a>about</h2>
+
+<p>Paste-app is a pasteboard/pinboard running on the social networking platform app.net.  Paste-app is the brainchild of Jonathon Duerig, <a href="https://github.com/duerig" class="user-mention">@duerig</a>, and is based on his code from the first session in the Learning the app.net API 101 patter room:<br>
+<a href="http://orbt.io/OrDC.pdf">http://orbt.io/OrDC.pdf</a><br>
+<a href="http://patter-app.net/room.html?channel=14380">http://patter-app.net/room.html?channel=14380</a></p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>usage</h2>
+
+<p>Each paste has a public link that can be viewed without logging in to app.net, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free) app.net account.  Pastes now have an optional title, type, and tags.</p>
+
+<h2>
+<a id="sausage" class="anchor" href="#sausage" aria-hidden="true"><span class="octicon octicon-link"></span></a>sausage</h2>
+
+<p>Pastes are messages in a user-created channel of type net.paste-app.clip.  The paste text itself is contained in an annotation of type net.paste-app.clip, while the message text contains the private link to the paste.  (The public link is a base 36 encoding of the channel and message IDs, which allows retrieval without authentication.)  You can direct the user to the private link (the paste-app.net website) to view the paste or retrieve the message yourself to display within an app.  The code is all client-side and is available at github, but you will need either mod_rewrite (the .htaccess file) or Amazon-style rerouting (the .aws-routing file) to resolve paste urls.</p>
+
+<h2>
+<a id="libraries" class="anchor" href="#libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>libraries</h2>
+
+<p>The app uses appnet.js, jquery, mustache.js, purl.js (for url handling), highlight.js (for code highlighting), and Skeleton, a responsive HTML5 template.  The ransom note font used in the images is BlackCasper by AllencHIU cHIU.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/mcdemarco">mcdemarco</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
