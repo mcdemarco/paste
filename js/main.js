@@ -11,8 +11,8 @@ var getvars = [];
 var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{message_id}';
 var currentDescription = "";
 
-//To force authorization: https://account.app.net/oauth/authorize etc.
-var authUrl = "https://account.app.net/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href.replace("!#","m") + "&scope=public_messages";
+//To force authorization: https://pnut.io/oauth/authorize etc.
+var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href.replace("!#","m") + "&scope=public_messages";
 
 //Mustache template for pastes.
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 

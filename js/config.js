@@ -1,7 +1,7 @@
-//config.js for paste-app.net
+//config.js for paste; replace <APP_ID> with your app id.
 //Site configuration file.
 
 var api = {
 	client_id: '<APP_ID>'
 };
-var pasteSite = "http://paste-app.net";
+var pasteSite = "http://paste.mcdemarco.net";
