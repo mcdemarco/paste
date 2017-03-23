@@ -2,6 +2,7 @@
  * base.js
  *
  * Base app.net library file. Sets up the single global appnet object.
+ * Adapted to pnut.io by mcdemarco.
  *
  */
 
@@ -224,7 +225,7 @@ if (typeof module !== 'undefined')
         "message_ids": [ "ids" ],
         "file_ids":    [ "ids" ]
     },
-    "base": "https://alpha-api.app.net/stream/0/",
+    "base": "https://api.pnut.io/v0/",
     "endpoints": [
         {
             "id": "100",
