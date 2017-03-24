@@ -324,10 +324,6 @@ function clickRepaste() {
 	//Now uses the paste form instead of automatically pasting.
 	clearForm();
 	var repasteDescription = $("#repasteDescription").val().replace("Paste Link is",defaultDescription + " repasted from");
-	//Handle old tags by conversion to hashtags. Deprecate me!
-	if ($('#pasteTags').length > 0) {
-		repasteDescription += "\n#" + $.trim($('#pasteTags').html()).split(" ").join(" #");
-	}
 	$('form#paste-create input#paste-title').val($('#yourPaste .pasteTitle').html());
 	$('form#paste-create textarea#paste-text').val($("#rawPaste").val());
 	$('form#paste-create select').val($('#yourPaste .pasteContentType').html());	
@@ -368,6 +364,7 @@ function formatPaste(respd, small) {
 	respd.longUrl = pasteSite + "/m/" + respd.id;
 	respd.flag = (small) ? "small" : "view";
 	respd.html = respd.content.html;
+	respd.text = respd.content.text;
 
 	//Determine highlighting class based on the content type, which doesn't always match.
 	if (respd.annotation && respd.annotation.content) {
