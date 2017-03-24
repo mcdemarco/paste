@@ -3,7 +3,7 @@
 //This version by @mcdemarco.
 
 var pasteChannel = null;
-var annotationArgs = {include_annotations: 1};
+var annotationArgs = {include_raw: 1};
 
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
@@ -12,7 +12,7 @@ var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{message_id}';
 var currentDescription = "";
 
 //To force authorization: https://pnut.io/oauth/authorize etc.
-var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + window.location.href.replace("!#","m") + "&scope=public_messages";
+var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + encodeURIComponent(window.location.href.replace("!#","m")) + "&scope=messages";
 
 //Mustache template for pastes.
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
@@ -58,7 +58,7 @@ function initialize() {
 	getvars = getUrlVars();
 	if (api.accessToken) {//If we have the token, get the user's pastes, too.
 		$(".loggedOut").hide();
-		$.appnet.authorize(api.accessToken,api.client_id);
+		$.pnut.authorize(api.accessToken,api.client_id);
 		getChannel();
 		$(".loggedIn").show('slow');
 	} else {//Otherwise, get one paste.
@@ -110,7 +110,7 @@ function getSingle() {
 	if (getvars['m']) {
 		if (!getvars['c']) {
 			if (api.accessToken) {
-				var promise = $.appnet.message.getList($.makeArray(getvars['m']), annotationArgs);
+				var promise = $.pnut.message.getList($.makeArray(getvars['m']), annotationArgs);
 				promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 				pushHistory(pasteSite + '/m/' + getvars['m']);
 			} else {
@@ -119,7 +119,7 @@ function getSingle() {
 			}
 		} else {
 			//We have the id & channel so can make an unauthenticated call.
-			var promise = $.appnet.message.get(getvars['c'], getvars['m'], annotationArgs);
+			var promise = $.pnut.message.get(getvars['c'], getvars['m'], annotationArgs);
 			promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 			pushHistory(pasteSite + '/m/' + getvars['enc'] );
 		}
@@ -146,7 +146,7 @@ function getChannel() {
 		count: 1,
 		channel_types: 'net.paste-app.clips'
 	};
-	var promise = $.appnet.channel.getCreated(args);
+	var promise = $.pnut.channel.getCreated(args);
 	promise.then(completeChannel, function (response) {failAlert('Failed to retrieve paste channel.');}).then(getSingle);
 }
 
@@ -155,10 +155,10 @@ function completeChannel(response) {
 		pasteChannel = response.data[0];
 		var args = {
 			count: multipleCount,
-			include_annotations: 1,
+			include_raw: 1,
 			include_deleted: 0
 		};
-		var promise = $.appnet.message.getChannel(pasteChannel.id, args);
+		var promise = $.pnut.message.getChannel(pasteChannel.id, args);
 		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve pastes.');});
 		api.channel_id = pasteChannel.id;
 	}
@@ -200,10 +200,10 @@ function morePastes() {
 		var args = {
 			before_id: api.lastId,
 			count: multipleCount,
-			include_annotations: 1,
+			include_raw: 1,
 			include_deleted: 0
 		};
-		var promise = $.appnet.message.getChannel(pasteChannel.id, args);
+		var promise = $.pnut.message.getChannel(pasteChannel.id, args);
 		promise.then(completeMultiple, function (response) {failAlert('Failed to retrieve pastes.');});
 		//Scroll to head of col2.
 		document.getElementById("col2").scrollIntoView();
@@ -220,18 +220,18 @@ function morePastes() {
 function createPaste(formObject,message) {
 	var newMessage = {
 		text: message,
-		annotations: [{
+		raw: [{
 						  type: 'net.paste-app.clip',
 						  value: formObject
 					  }]
 	};
-	if (JSON.stringify(newMessage.annotations).length > 8192) {
+	if (JSON.stringify(newMessage.raw).length > 8192) {
 		//In this case we know the paste is too long, but passing this check is no guarantee. 
 		//Need to implement a real byte-counter here for deciding to paste to a file.
 		failAlert("Paste too long.");
 		return;
 	}
-	var promise = $.appnet.message.create(pasteChannel.id, newMessage, annotationArgs);
+	var promise = $.pnut.message.create(pasteChannel.id, newMessage, annotationArgs);
 	promise.then(completePaste, function (response) {failAlert('Failed to create paste.');});
 }
 
@@ -251,10 +251,9 @@ function createPasteChannel(formObject,message) {
 	};
 	var channel = {
 		type: 'net.paste-app.clips',
-		auto_subscribe: true,
-		readers: { 'public': true }
+		acl: {'read': {'any_user' : true, 'public': true}}
 	};
-	var promise = $.appnet.channel.create(channel);
+	var promise = $.pnut.channel.create(channel);
 	promise.then($.proxy(completeCreateChannel, context), function (response) {failAlert('Failed to create paste channel.');});
 }
 
@@ -265,7 +264,7 @@ function completeCreateChannel(response) {
 
 function deletePaste(messageId) {
 	//We know api.channel_id is set and matches.
-	var promise = $.appnet.message.destroy(api.channel_id, messageId);
+	var promise = $.pnut.message.destroy(api.channel_id, messageId);
 	promise.then(completeDelete, function (response) {failAlert('Failed to delete paste.');});
 }
 
@@ -347,14 +346,16 @@ function formatPaste(respd, small) {
 	//Small means the paste is going into the recent pastes list and needs the enlarge button.
 	//Otherwise, it needs raw text, repaste button, user link, etc.
 
-	//Flatten the annotations for use in the template.
-	var annotations = respd.annotations;
+	//Flatten the raw for use in the template.
+	var raw = respd.raw;
 	var i = 0;
-	for (; i < annotations.length; ++i) {
-		if (annotations[i].type === 'net.paste-app.clip') {
-			respd.annotation = annotations[i].value;
+	if (raw) {
+	for (; i < raw.length; ++i) {
+		if (raw[i].type === 'net.paste-app.clip') {
+			respd.annotation = raw[i].value;
 			respd.oldTags = (respd.annotation.tags && respd.annotation.tags != []) ? true : false;
 		}
+	}
 	}
 	//Add more info for use by the template.
 	var pasteDate = new Date(respd.created_at);
