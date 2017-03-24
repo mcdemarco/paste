@@ -8,7 +8,7 @@ var annotationArgs = {include_raw: 1};
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
-var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{message_id}';
+var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{object_id}';
 var currentDescription = "";
 
 //To force authorization: https://pnut.io/oauth/authorize etc.
@@ -30,7 +30,6 @@ var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>"
 				+ "<input id='repasteDescription' type='hidden' value='{{text}}'/>"
 				+ "<div class='description'><strong>Description:</strong><br/> {{{html}}}</div>"
 				+ "<p>"
-				+ "{{#oldTags}}<strong>Tags:</strong> {{#annotation}}<span id='pasteTags'>{{#tags}}{{.}} {{/tags}}</span>{{/annotation}}<br />{{/oldTags}}"
 				+ "<strong>Public link:</strong> <a href='{{shortUrl}}'>{{shortUrl}}</a><br />"
 				+ "<strong>Private link:</strong> <a href='{{longUrl}}'>{{longUrl}}</a></p>"
 				+ "<div>"
@@ -353,7 +352,6 @@ function formatPaste(respd, small) {
 	for (; i < raw.length; ++i) {
 		if (raw[i].type === 'net.paste-app.clip') {
 			respd.annotation = raw[i].value;
-			respd.oldTags = (respd.annotation.tags && respd.annotation.tags != []) ? true : false;
 		}
 	}
 	}
@@ -367,6 +365,7 @@ function formatPaste(respd, small) {
 	respd.shortUrl = pasteSite + "/m/" + respd.shorty;
 	respd.longUrl = pasteSite + "/m/" + respd.id;
 	respd.flag = (small) ? "small" : "view";
+	respd.html = respd.content.html;
 
 	//Determine highlighting class based on the content type, which doesn't always match.
 	if (respd.annotation && respd.annotation.content) {
