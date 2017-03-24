@@ -1347,7 +1347,6 @@ if (typeof module !== 'undefined')
     ]
 };
 }(jQuery));
-
 /*
  * core.js
  *
@@ -1787,3 +1786,4 @@ if (typeof module !== 'undefined')
   };
 
 }(jQuery));
+

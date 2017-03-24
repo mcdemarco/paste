@@ -106,10 +106,11 @@ function getUrlVars(url) {
 }
 
 function getSingle() {
+	var promise;
 	if (getvars['m']) {
 		if (!getvars['c']) {
 			if (api.accessToken) {
-				var promise = $.pnut.message.getList($.makeArray(getvars['m']), annotationArgs);
+				promise = $.pnut.message.getList($.makeArray(getvars['m']), annotationArgs);
 				promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 				pushHistory(pasteSite + '/m/' + getvars['m']);
 			} else {
@@ -118,7 +119,7 @@ function getSingle() {
 			}
 		} else {
 			//We have the id & channel so can make an unauthenticated call.
-			var promise = $.pnut.message.get(getvars['c'], getvars['m'], annotationArgs);
+			promise = $.pnut.message.get(getvars['c'], getvars['m'], annotationArgs);
 			promise.then(completeSingle, function (response) {failAlert('Failed to load paste.');});
 			pushHistory(pasteSite + '/m/' + getvars['enc'] );
 		}
@@ -337,6 +338,7 @@ function clickRepaste() {
 }
 
 function failAlert(msg) {
+	console.log(msg);
 	document.getElementById("pasteError").scrollIntoView();
 	$('#pasteError').html(msg).show().fadeOut(8000);
 }
