@@ -4,6 +4,7 @@
 
 var pasteChannel = null;
 var annotationArgs = {include_raw: 1};
+var aws = false; //For amazon static hosting.
 
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
@@ -12,7 +13,7 @@ var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{object_id}';
 var currentDescription = "";
 
 //To force authorization: https://pnut.io/oauth/authorize etc.
-var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + encodeURIComponent(window.location.href.replace("!#","m")) + "&scope=messages";
+var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + encodeURIComponent(window.location.protocol + "//" + window.location.host) + "&scope=messages";
 
 //Mustache template for pastes.
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
@@ -50,13 +51,26 @@ var compiledTemplate = Mustache.compile(stringTemplate);
 /* main execution path */
 
 function initialize() {
-	//aws doesn't do rewrites, so manually rewrite the hash-bang back to the url
-	//http://stackoverflow.com/questions/16267339/s3-static-website-hosting-route-all-paths-to-index-html
-	pushHistory(window.location.href.replace("#!","m"));
+	if (aws) {
+		//aws doesn't do rewrites, so manually rewrite the hash-bang back to the url
+		//http://stackoverflow.com/questions/16267339/s3-static-website-hosting-route-all-paths-to-index-html
+		pushHistory(window.location.href.replace("#!","m"));
+	}
 	//Parse the url.
 	getvars = getUrlVars();
 	if (api.accessToken) {//If we have the token, get the user's pastes, too.
 		$(".loggedOut").hide();
+
+		//Recover paste id (workaround for lack of auth wildcards)
+		if (getvars.length == 0 && localStorage && localStorage["currentPasteEnc"]) {
+			//Restore the stored path.
+			getvars = getShortVars(localStorage["currentPasteEnc"]);
+			pushHistory(pasteSite + '/m/' + getvars['enc']);
+			try {
+				localStorage.removeItem("currentPasteEnc");
+			} catch (e) {}
+		}
+
 		$.pnut.authorize(api.accessToken,api.client_id);
 		getChannel();
 		$(".loggedIn").show('slow');
@@ -80,7 +94,7 @@ function getUrlVars(url) {
 	var vars = [];
 	if (!url) {
 		//If no url passed in explicitly, we should check the current location for authentication info.
-		url = $.url(window.location.href.replace("!#","m"));
+		url = $.url(window.location.href);
 		if (url.fparam('access_token') && url.fparam('access_token').length > 0 ) {
 			api.accessToken = url.fparam('access_token');
 			//Hide & store the access token.
@@ -412,7 +426,7 @@ function getFormAsObject($form){
 
 function getShortVars(shorty) {
 	var vars = [];
-	splits = shorty.split("-");
+	var splits = shorty.split("-");
 	if (splits.length > 0) {		
 		vars['enc'] = shorty;
 		vars['c'] = parseInt(splits[0], 36);
@@ -422,6 +436,14 @@ function getShortVars(shorty) {
 }
 
 function login() {
+	//Store the url before logging in because of auth wildcarding issues.
+	var vars = getUrlVars($.url(window.location.pathname));
+	if (localStorage && vars['enc']) {
+		//We know the url (if any) is encoded because the user is not logged in.
+		try {
+			localStorage["currentPasteEnc"] = vars['enc'];
+		} catch (e) {}
+	}
 	window.location = authUrl;
 }
 

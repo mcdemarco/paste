@@ -93,7 +93,8 @@
 			<h5>A clipboard for pnut.io</h5>
 		</div>
 		<div class="two columns" style="text-align:right;">
-			<button class="loggedIn" id="logOutButton" style="display:none;margin-top:-10px;" onclick="logout();">Log Out</a>
+			<button class="loggedIn" id="logOutButton" style="display:none;margin-top:-10px;" onclick="logout();">Log Out</button>
+			<button class="loggedOut" id="logInButton" style="display:none;margin-top:-10px;" onclick="login();" title="Authenticate with pnut.io">Log In</button>
 		</div>
 
 		<div class="sixteen columns">
@@ -125,9 +126,7 @@
 			<div id="pasteError"></div>
 			<div id="yourPaste"><p class="loggedOut" style="display:none;"></p></div>
 			<div id="loginRequest" class="loggedOut" style="display:none;">
-			 <p>A pnut.io account is required to create new pastes.
-			  <a href='' class='adn-button' data-type='authorize_v2' data-width="145" data-height="22" >Authorize with pnut.io</a>
-			 </p>
+			 <p>A pnut.io account is required to create new pastes.</p>
 			</div>
 			<div id="newPaste" class="loggedIn" style="display:none;">
 			 <h3>New Paste</h3>
