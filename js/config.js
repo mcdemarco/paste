@@ -2,6 +2,6 @@
 //Site configuration file.
 
 var api = {
-	client_id: '<APP_ID>'
+	client_id: '<APP_ID>',
+	paste_site: '//paste.example.com'
 };
-var pasteSite = "http://paste.mcdemarco.net";

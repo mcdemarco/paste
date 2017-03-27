@@ -9,6 +9,7 @@ var aws = false; //For amazon static hosting.
 var multipleCount = 8; //Number of recent pastes to retrieve for logged-in user.
 var highlightMin = 75; //Minimum paste length to trigger auto-highlighting. (It's bad at language detection for short lengths.)
 var getvars = [];
+var pasteSite = window.location.protocol + api.paste_site;
 var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{object_id}';
 var currentDescription = "";
 
