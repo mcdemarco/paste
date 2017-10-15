@@ -428,7 +428,7 @@ function getFormAsObject($form){
 function getShortVars(shorty) {
 	var vars = [];
 	var splits = shorty.split("-");
-	if (splits.length > 0) {		
+	if (splits.length > 0) {
 		vars['enc'] = shorty;
 		vars['c'] = parseInt(splits[0], 36);
 		vars['m'] = parseInt(splits[1], 36);
