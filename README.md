@@ -17,7 +17,7 @@ http://orbt.io/OrDC.pdf
 usage
 -----
 
-Each paste has a public link that can be viewed without logging in to pnut.io, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a (free, invitation-only) pnut.io account.  Pastes now have an optional title, type, and tags.
+Each paste has a public link that can be viewed without logging in to pnut.io, as well as a "private" link which will display both the selected paste and a list of the logged-in user's recent pastes.  To create a new paste, you will need a pnut.io account.  Pastes now have an optional title, type, and tags.
 
 sausage
 -------
