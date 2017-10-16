@@ -14,7 +14,7 @@ var defaultDescription = 'Paste Link is ' + pasteSite + '/m/{object_id}';
 var currentDescription = "";
 
 //To force authorization: https://pnut.io/oauth/authorize etc.
-var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + encodeURIComponent(window.location.protocol + "//" + window.location.host) + "&scope=messages";
+var authUrl = "https://pnut.io/oauth/authenticate?client_id=" + api['client_id'] + "&response_type=token&redirect_uri=" + encodeURIComponent(window.location.protocol + "//" + window.location.host) + "&scope=public_messages:net.paste-app.clips";
 
 //Mustache template for pastes.
 var stringTemplate = "<div id='{{flag}}-{{id}}' class='paste {{flag}}'>" 
