@@ -2,6 +2,7 @@
 //Site configuration file.
 
 var api = {
-	client_id: '<APP_ID>',
-	paste_site: '//paste.example.com'
+	client_id: 'OvsEEF9R9IhRXZihjUNOWrb7DDX6AaRd',
+	paste_site: '//paste.mcdemarco.net'
 };
+
